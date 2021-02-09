@@ -5,6 +5,11 @@ This is the repository for the Individual Research Project, as part of the CENG3
 The project objective is to investigate the applicability of novel computer vision methods for production line environments, working towards end-to-end traceability through persistent detection and tracking. The system should be capable of tracking items throughout the production line, as well as accumulating damage indicators between frames. 
 
 ## Usage Information
-The project is developed using Python 3.8.7, and required libraries can be installed using the requirements.txt file. Alternatively, the supplied Virtual Environment can be used. The Virtual Environment can be activated using "Virtual_Environments\my-env\Scripts\activate.bat".  
+The project is developed in Ubuntu 20.04.1 LTS, using Python 3.8.5. Required libraries can be installed using the "./requirements/linux-requirements.txt" file.
 
-The Data Generator is built using Unity 2020.2.0f1, with the High Definition Render Pipeline (HDRP).
+## Other Requirements
+This project uses the "multi-object-tracker" library developed by adipandas in order to speed up / streamline tracker implementation. Installation instructions can be found here if required: https://github.com/adipandas/multi-object-tracker  
+
+This project also plans to use the Scaled-YOLOv4 detector, found at https://github.com/WongKinYiu/ScaledYOLOv4. This requires the "mish-cuda" library developed by thomasbrandon, which can be found at https://github.com/thomasbrandon/mish-cuda, or installed with "pip install git+https://github.com/thomasbrandon/mish-cuda/".
+
+Pytorch is also a planned requirement for the project. This can be downloaded from the official pytorch website (https://pytorch.org/get-started/locally/), along with the corresponding version of the Nvidia Cuda Toolkit (v11.0 is used here).

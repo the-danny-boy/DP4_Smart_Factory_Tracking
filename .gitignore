@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Ignore vendor folder
+vendor/
+
+# Ignore virtual environment folder
+Virtual_Environments/
