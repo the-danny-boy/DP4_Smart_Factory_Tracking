@@ -7,6 +7,8 @@ The project objective is to investigate the applicability of novel computer visi
 ## Usage Information
 The project is developed in Ubuntu 20.04.1 LTS, using Python 3.8.5. Required libraries can be installed using the "./requirements/linux-requirements.txt" file.
 
+The "Data_Generator" is built using Unity 2020.2.3f1, with the High Definition Render Pipeline (HDRP), and Vulkan Graphics API for Linux.
+
 ## Other Requirements
 This project uses the "multi-object-tracker" library developed by adipandas in order to speed up / streamline tracker implementation. Installation instructions can be found here if required: https://github.com/adipandas/multi-object-tracker  
 
