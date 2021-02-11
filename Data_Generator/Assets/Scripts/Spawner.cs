@@ -19,10 +19,16 @@ public class Spawner : MonoBehaviour
     private Vector3 gravityDirection = new Vector3(0f, 0f, -9.81f);
     private float displayHeight = 9f;
 
+    public GameObject cameraGameObject;
+    Camera cam;
+
+    private float vialCentroidHeight = 0.65f;
+
     // Start is called before the first frame update
     void Start()
     {
 
+        cam = cameraGameObject.GetComponent<Camera>();
         Physics.gravity = gravityDirection;
         Random.InitState(42);
         Spawn();
@@ -44,16 +50,28 @@ public class Spawner : MonoBehaviour
         // TODO - Get base measurements, which are at y=0...
 
         string _positions = "";
+
+        // Iterate through each spawned vial
         foreach (var obj in spawnedGameObjects)
         {
+
+            // Fetch and append object ID
             _positions += obj.GetInstanceID();
             _positions += ",";
-            _positions += obj.transform.position;
+
+            // Finds vial base point by translating down local vial csys by height of centre point
+            Vector3 vialBasePt = obj.transform.position + -vialCentroidHeight * obj.transform.forward;
+            
+            // Append screen position
+            Vector3 objScreenPos = cam.WorldToScreenPoint(vialBasePt);
+            _positions += new Vector2(objScreenPos.x, objScreenPos.y);
             _positions += " ";
+
         }
 
-        // Get the screen space position
-        // Debug.Log(_positions);
+        // Print all the position-id information to the console
+        Debug.Log(_positions);
+
     }
 
     // Spawn function - generates points and instantiates game objects at them
