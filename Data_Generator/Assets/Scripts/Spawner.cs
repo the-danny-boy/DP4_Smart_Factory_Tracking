@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
@@ -16,23 +17,39 @@ public class Spawner : MonoBehaviour
     [SerializeField] private int spawnLimit = 10;
 
     private List<GameObject> spawnedGameObjects = new List<GameObject>();
-    private Vector3 gravityDirection = new Vector3(0f, 0f, -9.81f);
+    private float inclinationAngle = 20f;
     private float displayHeight = 9f;
 
     public GameObject cameraGameObject;
     Camera cam;
 
     private float vialCentroidHeight = 0.65f;
+    int totalCollisions = 0;
+
+    List<string> trackerData;
+    List<int> collisionData;
+
+    private static string pathToWrite = "Assets/Outputs/";
+    private static string timestamp = System.DateTime.Now.ToString("yyy.MM.dd_HHmm_");
+
+    private string trackerFile = pathToWrite + timestamp + "trackerData.txt";
+    private string collisionFile = pathToWrite + timestamp + "collisionData.txt";
+    
 
     // Start is called before the first frame update
     void Start()
     {
 
+        collisionData = new List<int>();
+
         cam = cameraGameObject.GetComponent<Camera>();
-        Physics.gravity = gravityDirection;
+        Physics.gravity = -9.81f * new Vector3(0f, Mathf.Cos(inclinationAngle * Mathf.Deg2Rad), Mathf.Sin(inclinationAngle * Mathf.Deg2Rad));
         Random.InitState(42);
         Spawn();
+
         // TODO - Print out Calibration Info for stitching
+        // E.g. the height of camera, object tip height, scale...
+        // For scale, can do the inverse transform to find out what 1 pixel corresponds to on the floor
 
     }
 
@@ -51,6 +68,8 @@ public class Spawner : MonoBehaviour
 
         string _positions = "";
 
+         totalCollisions = 0;
+
         // Iterate through each spawned vial
         foreach (var obj in spawnedGameObjects)
         {
@@ -67,10 +86,38 @@ public class Spawner : MonoBehaviour
             _positions += new Vector2(objScreenPos.x, objScreenPos.y);
             _positions += " ";
 
+
+            // Debug.Log(obj.GetComponent<CollisionDetection>().collisionCounter);
+            totalCollisions += obj.GetComponent<CollisionDetection>().collisionCounter;
+
         }
 
         // Print all the position-id information to the console
-        Debug.Log(_positions);
+        //Debug.Log(_positions);
+        //Debug.Log("Total Collisions: " + totalCollisions);
+
+    }
+
+    // Update function - called every time a frame is drawn
+    void Update()
+    {
+        //trackerData.Add();
+        //Debug.Log(totalCollisions);
+        collisionData.Add(totalCollisions);
+        //Debug.Log(collisionData);
+    }
+
+    // Function called upon quitting - use this to save out data
+    void OnApplicationQuit()
+    {
+
+        string writeText = "";
+        foreach(int data in collisionData)
+        {
+            writeText += Convert.ToString(data) + "\n";
+        }
+
+        File.AppendAllText(collisionFile, writeText);
 
     }
 
@@ -80,7 +127,7 @@ public class Spawner : MonoBehaviour
         List<Vector2> points = PoissonDiscSample(radius, spawnExtents, rejectionNumber, spawnLimit);
         foreach (Vector2 point in points)
         {
-            Vector3 _pt3D = new Vector3(point.x - spawnExtents.x / 2f, COM_height, point.y - spawnExtents.y / 2f);
+            Vector3 _pt3D = new Vector3(point.x - spawnExtents.x / 2f, COM_height, point.y - spawnExtents.y / 2f) + this.transform.position;
             GameObject _instantiatedObject = Instantiate(spawnTemplateGameObject, _pt3D, Quaternion.Euler(-90,0,0));
             spawnedGameObjects.Add(_instantiatedObject);
         }

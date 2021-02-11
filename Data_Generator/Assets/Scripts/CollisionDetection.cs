@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class CollisionDetection : MonoBehaviour
 {
+
+    public int collisionCounter = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -24,7 +27,17 @@ public class CollisionDetection : MonoBehaviour
     {
         if (other.gameObject.name != "Ground")
         {
-            Debug.Log("COLLISION!!!");
+            //Note - collisionCounter is per vial - only looks locally to itself
+            collisionCounter++;
+
+            //Debug.Log(this.GetComponent<Rigidbody>().velocity.magnitude);
+            //Debug.Log(other.GetComponent<Rigidbody>().velocity.magnitude);
+
+            // Get relativeVelocity between colliding components (m/s)
+            //Debug.Log(other.relativeVelocity.magnitude);
+
+            //Debug.Log("No. of Collisions = " + collisionCounter);
+            //Debug.Log("COLLISION!!!");
         }
     }
 
