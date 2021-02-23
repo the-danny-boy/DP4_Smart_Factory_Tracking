@@ -90,9 +90,9 @@ if __name__ == "__main__":
         # Apply detection
         ret, frame = detector_func(frame, *parameter_settings)
 
-        # If detection fails, proceed to next frame
+        # Check if detection valid
         if not ret:
-            continue
+            break
 
         # Display frame contents
         cv2.imshow(window_name, frame)

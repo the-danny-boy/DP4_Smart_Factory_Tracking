@@ -7,6 +7,31 @@ import numpy as np
 import cv2
 
 from acquisition import VideoStream
+from utility_functions import crosshair
+
+# Connected components filtering (from segmentation to detection)
+def connectedFiltering(frame, mask):
+
+    # Use connected components for blob detection
+    connectivity = 4
+    output = cv2.connectedComponentsWithStats(mask, connectivity, cv2.CV_32S)
+    (numLabels, labels, stats, centroids) = output
+
+    # Iterate through detected blobs and extract statistics for filtering
+    for i in range(1, numLabels):
+        x = stats[i, cv2.CC_STAT_LEFT]
+        y = stats[i, cv2.CC_STAT_TOP]
+        w = stats[i, cv2.CC_STAT_WIDTH]
+        h = stats[i, cv2.CC_STAT_HEIGHT]
+        area = stats[i, cv2.CC_STAT_AREA]
+
+        (cX, cY) = centroids[i]
+
+        if area > 0 and area < 1500:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+            crosshair(frame, (int(cX), int(cY)))
+    
+    return None
 
 # Hough Circle Detection Function
 def houghDetect(frame):
@@ -35,7 +60,10 @@ def hsvDetect(frame, hue_low, hue_high, sat_low, sat_high, val_low, val_high):
 
         # Segment the frame using the binary mask
         hsv_seg = cv2.bitwise_and(frame, frame, mask = mask)
-        return True, hsv_seg
+
+        connectedFiltering(frame, mask)
+
+        return True, frame
     
     except:
         return None, False
