@@ -171,8 +171,46 @@ def hsvDetect(frame, hue_low, hue_high, sat_low, sat_high, val_low, val_high, de
 
 
 # Template Match Detection
-def templateMatch(frame):
-    pass
+def templateMatch(frame, placeholder = None, template_path = "Template.png", debug = False):
+    try:
+    
+        # Load template image
+        template = cv2.imread(template_path)
+
+        # Extract dimensions
+        h, w = template.shape[:2]
+
+        # Select method for template matching
+        method = cv2.TM_CCOEFF_NORMED
+
+        # Set match threshold
+        threshold = 0.40
+
+        # Perform matching
+        matched = cv2.matchTemplate(frame, template, method)
+
+        points = []
+        max_val = 1
+
+        # While matched points exist that are above the threshold
+        while max_val > threshold:
+
+            # Detect min and max value locations in matched array
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched)
+
+            # If value above threshold, annotate frame and append centroid to point list
+            if max_val > threshold:
+                matched[max_loc[1]-h//2:max_loc[1]+h//2+1, max_loc[0]-w//2:max_loc[0]+w//2+1] = 0   
+                cv2.rectangle(frame,(max_loc[0],max_loc[1]), (max_loc[0]+w+1, max_loc[1]+h+1), (0,255,0) )
+                points.append((int(max_loc[0]+(w+1)/2), int(max_loc[1] + (h+1)/2)))
+        
+        # Show the detection window
+        cv2.imshow("Detections",frame)
+
+        return True, points
+    
+    except:
+        return False, None
 
 
 # Perform a sweep to benchmark detectors

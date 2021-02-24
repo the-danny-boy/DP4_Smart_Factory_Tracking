@@ -39,6 +39,7 @@ def trackbarSetup(window_name, detector_type):
                       "Value High":[0,255]}
 
     elif detector_type == "template":
+        parameters = {"Placeholder":[0,1]}
         pass
 
     for p, v in zip(parameters.keys(), parameters.values()):
@@ -53,7 +54,7 @@ if __name__ == "__main__":
                      fps = 30, height = int(1080*SCALE_FACTOR), width = int(1920*SCALE_FACTOR))
     
     # The selector index for which detector to use
-    detector_sel = 0 
+    detector_sel = 3
 
     # Start the video stream object
     vs.start()
