@@ -8,6 +8,7 @@ import cv2
 
 from acquisition import VideoStream
 from detection import houghDetect, grayscaleDetect, hsvDetect, templateMatch
+from utility_functions import crosshair
 
 
 #Empty callback function
@@ -72,11 +73,9 @@ if __name__ == "__main__":
     # Main logic loop
     while True:
 
-        # Fetch next available frame from generator
-
+        # Fetch target frame using trackbar
         frame_no=cv2.getTrackbarPos("Frame No.", window_name)
         vs.cap.set(cv2.CAP_PROP_POS_FRAMES, frame_no)
-
         ret, frame = next(vs.read())
 
         # Check if valid return flag
@@ -84,15 +83,16 @@ if __name__ == "__main__":
             break
     
         # Fetch detector parameters from the trackbars
-        for index, p in enumerate(parameters.keys()):
-            parameter_settings[index] = cv2.getTrackbarPos(p, window_name)
+        for index, parameter in enumerate(parameters.keys()):
+            parameter_settings[index] = cv2.getTrackbarPos(parameter, window_name)
 
-        # Apply detection
-        ret, frame = detector_func(frame, *parameter_settings)
-
-        # Check if detection valid
-        if not ret:
-            break
+        # Apply detecto (and show debug visualisation window)
+        ret, points = detector_func(frame, *parameter_settings, debug = True)
+        
+        # If successful detection, visualise with blue crosshairs in same window
+        if ret:
+            for point in points:
+                crosshair(frame, point, color = (255,0,0))
 
         # Display frame contents
         cv2.imshow(window_name, frame)
