@@ -20,17 +20,23 @@ def nothing(x):
 def trackbarSetup(window_name, detector_type):
 
     if detector_type == "hough":
-        pass
+        parameters = {"dp":[10,20], #Note: scaled by 10, as integer trackbars
+                      "minDist":[0,30],
+                      "param1":[0,300],
+                      "param2":[0,20],
+                      "minRadius":[0,30],
+                      "maxRadius":[0,30]}
+
     elif detector_type == "gray":
         pass
 
     elif detector_type == "hsv":
         parameters = {"Hue Low":[0, 179],
-                  "Hue High":[0, 179],
-                  "Saturation Low":[0,255],
-                  "Saturation High":[0, 255],
-                  "Value Low":[0, 255],
-                  "Value High":[0,255]}
+                      "Hue High":[0, 179],
+                      "Saturation Low":[0,255],
+                      "Saturation High":[0, 255],
+                      "Value Low":[0, 255],
+                      "Value High":[0,255]}
 
     elif detector_type == "template":
         pass
@@ -45,7 +51,9 @@ if __name__ == "__main__":
     SCALE_FACTOR = 0.5
     vs = VideoStream(src = "../Data_Generator/Assets/Outputs/2021-02-21_23h37m_Camera1_005.webm", 
                      fps = 30, height = int(1080*SCALE_FACTOR), width = int(1920*SCALE_FACTOR))
-    detector_sel = 2 # The selector index for which detector to use
+    
+    # The selector index for which detector to use
+    detector_sel = 0 
 
     # Start the video stream object
     vs.start()

@@ -67,6 +67,7 @@ def connectedFiltering(frame, mask, debug = False):
 
         points.append((corrected_x, corrected_y))
 
+        # Perform selection of connection components based on area
         if area > 0 and area < 1500:
             # Draw bounding box for connected component
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
@@ -85,8 +86,55 @@ def connectedFiltering(frame, mask, debug = False):
 
 
 # Hough Circle Detection Function
-def houghDetect(frame):
-    pass
+def houghDetect(frame, dp, minDist, param1, param2, minRadius, maxRadius, debug = False):
+    
+    # DESCRIPTION OF PARAMETERS ============================================
+    # dp is the inverse ratio of accumulator resolution to image resolution
+    # Min dist is minimum distance between circle centres
+    # Param1 is higher threshold for edge detection
+    # Param2 is accumulator threshold
+    # Min and max radius constrain the detected circle sizes
+    
+    # Convert to grayscale for hough circle detection
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Consider blurring to reduce noisy circles
+    #gray = cv2.medianBlur(gray,15)
+
+    try:
+        
+        # Scale dp back to expected range
+        dp = dp / 10 if dp > 10 else dp
+
+        # Detect circles using hough circle transform method
+        circles = cv2.HoughCircles(gray, method = cv2.HOUGH_GRADIENT,
+                               dp = dp, minDist = minDist,
+                               param1 = param1, param2 = param2,
+                               minRadius = minRadius, maxRadius = maxRadius)
+    
+        points = []
+        try:
+
+            # Convet array to integers, and return x,y,r values
+            circles = np.round(circles[0,:].astype("int"))
+
+            for (x,y,r) in circles:
+                    # Append circle centres to list
+                    points.append((x,y))
+                    
+                    # Show detection window if debug enabled
+                    if debug:
+                        cv2.circle(frame, (x,y), int(r), (0,0,255), 2)
+                        cv2.imshow("Detections", frame)
+
+
+        except Exception as e:
+            pass
+
+        return True, points
+    
+    except Exception as e:
+        return False, None
 
 
 # Grayscale Detection Function

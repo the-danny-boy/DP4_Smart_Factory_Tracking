@@ -6,7 +6,10 @@ This script serves as an entrypoint to the technology demo.
 import numpy as np
 import cv2
 
+from functools import partial
+
 from acquisition import VideoStream
+from detection import houghDetect, grayscaleDetect, hsvDetect, templateMatch
 from process import StreamProcessor
 
 # Create a video stream object with video file and specified frame rate and frame size
