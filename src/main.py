@@ -17,13 +17,17 @@ SCALE_FACTOR = 0.5
 vs = VideoStream(src = "../Data_Generator/Assets/Outputs/2021-02-21_23h37m_Camera1_005.webm", 
                     fps = 30, height = int(1080*SCALE_FACTOR), width = int(1920*SCALE_FACTOR))
 
-sp = StreamProcessor(src = vs)
+detector_func = partial(houghDetect, dp = 1.5, minDist = 20, 
+                                     param1 = 27, param2 = 19, 
+                                     minRadius = 12, maxRadius = 15, debug = False)
+
+sp = StreamProcessor(src = vs, detector = detector_func)
 
 # Main logic loop
 while True:
 
     # Process next frame
-    ret, frame = sp.update()
+    ret, frame = sp.update(analyse = True)
 
     # Check if valid return flag
     if not ret:

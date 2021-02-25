@@ -13,7 +13,8 @@ from utility_functions import crosshair
 
 # Correction function to project detected point from neck of vial to base
 # in order to minimise disparity
-def baseCorrection(point, y_object = 0.3, y_camera = 6.0, x_max = 1920, y_max = 1080, strength = 1.8):
+def baseCorrection(point, y_object = 0.3, y_camera = 6.0, 
+                          x_max = 1920, y_max = 1080, strength = 1.8):
     
     # Find centre of camera 
     x_centre = x_max/2
@@ -49,6 +50,7 @@ def connectedFiltering(frame, mask, debug = False):
     (numLabels, labels, stats, centroids) = output
 
     points = []
+    debug_frame = frame.copy()
 
     # Iterate through detected blobs and extract statistics for filtering
     for i in range(1, numLabels):
@@ -67,26 +69,30 @@ def connectedFiltering(frame, mask, debug = False):
 
         points.append((corrected_x, corrected_y))
 
-        # Perform selection of connection components based on area
-        if area > 0 and area < 1500:
-            # Draw bounding box for connected component
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
-
-            # Draw connected component centroid (red)
-            crosshair(frame, (int(centroid_x), int(centroid_y)), color = (0, 0, 255))
-
-            # Draw corrected base point (green)
-            crosshair(frame, (int(corrected_x), int(corrected_y)), color = (0, 255, 0))
-        
-        # Show detection window if debug enabled
         if debug:
-            cv2.imshow("Detections", frame)
+            
+            # Perform selection of connection components based on area
+            if area > 0 and area < 1500:
+
+                # Draw bounding box for connected component
+                cv2.rectangle(debug_frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+
+                # Draw connected component centroid (red)
+                crosshair(debug_frame, (int(centroid_x), int(centroid_y)), color = (0, 0, 255))
+
+                # Draw corrected base point (green)
+                crosshair(debug_frame, (int(corrected_x), int(corrected_y)), color = (0, 255, 0))
+            
+                # Show detection window if debug enabled
+                cv2.imshow("Detections", debug_frame)
 
     return points
 
 
 # Hough Circle Detection Function
-def houghDetect(frame, dp, minDist, param1, param2, minRadius, maxRadius, debug = False):
+def houghDetect(frame, dp = 1.5, minDist = 20, 
+                       param1 = 20, param2 = 20, 
+                       minRadius = 10, maxRadius = 15, debug = False):
     
     # DESCRIPTION OF PARAMETERS ============================================
     # dp is the inverse ratio of accumulator resolution to image resolution
@@ -94,6 +100,8 @@ def houghDetect(frame, dp, minDist, param1, param2, minRadius, maxRadius, debug 
     # Param1 is higher threshold for edge detection
     # Param2 is accumulator threshold
     # Min and max radius constrain the detected circle sizes
+
+    debug_frame = frame.copy()
     
     # Convert to grayscale for hough circle detection
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -124,8 +132,8 @@ def houghDetect(frame, dp, minDist, param1, param2, minRadius, maxRadius, debug 
                     
                     # Show detection window if debug enabled
                     if debug:
-                        cv2.circle(frame, (x,y), int(r), (0,0,255), 2)
-                        cv2.imshow("Detections", frame)
+                        cv2.circle(debug_frame, (x,y), int(r), (0,0,255), 2)
+                        cv2.imshow("Detections", debug_frame)
 
 
         except Exception as e:
@@ -143,7 +151,9 @@ def grayscaleDetect(frame):
 
 
 # HSV Detection Function
-def hsvDetect(frame, hue_low, hue_high, sat_low, sat_high, val_low, val_high, debug = False):
+def hsvDetect(frame, hue_low = 0, hue_high = 179, 
+                     sat_low = 0, sat_high = 255, 
+                     val_low = 0, val_high = 255, debug = False):
     try:
 
         # Blur the frame to reduce noise
@@ -171,7 +181,8 @@ def hsvDetect(frame, hue_low, hue_high, sat_low, sat_high, val_low, val_high, de
 
 
 # Template Match Detection
-def templateMatch(frame, placeholder = None, template_path = "Template.png", debug = False):
+def templateMatch(frame, placeholder = None, 
+                         template_path = "Template.png", debug = False):
     try:
     
         # Load template image
@@ -189,6 +200,7 @@ def templateMatch(frame, placeholder = None, template_path = "Template.png", deb
         # Perform matching
         matched = cv2.matchTemplate(frame, template, method)
 
+        debug_frame = frame.copy()
         points = []
         max_val = 1
 
@@ -201,11 +213,11 @@ def templateMatch(frame, placeholder = None, template_path = "Template.png", deb
             # If value above threshold, annotate frame and append centroid to point list
             if max_val > threshold:
                 matched[max_loc[1]-h//2:max_loc[1]+h//2+1, max_loc[0]-w//2:max_loc[0]+w//2+1] = 0   
-                cv2.rectangle(frame,(max_loc[0],max_loc[1]), (max_loc[0]+w+1, max_loc[1]+h+1), (0,255,0) )
                 points.append((int(max_loc[0]+(w+1)/2), int(max_loc[1] + (h+1)/2)))
         
-        # Show the detection window
-        cv2.imshow("Detections",frame)
+                if debug:
+                    cv2.rectangle(debug_frame,(max_loc[0],max_loc[1]), (max_loc[0]+w+1, max_loc[1]+h+1), (0,255,0) )
+                    cv2.imshow("Detections",debug_frame)
 
         return True, points
     
