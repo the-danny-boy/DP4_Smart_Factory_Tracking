@@ -96,7 +96,7 @@ if __name__ == "__main__":
             parameter_settings[index] = cv2.getTrackbarPos(parameter, window_name)
 
         # Apply detecto (and show debug visualisation window)
-        ret, points = detector_func(frame, *parameter_settings, debug = True)
+        ret, bboxes, points = detector_func(frame, *parameter_settings, debug = True)
         
         # If successful detection, visualise with blue crosshairs in same window
         if ret:

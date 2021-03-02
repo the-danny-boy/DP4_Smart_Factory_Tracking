@@ -41,11 +41,15 @@ class StreamProcessor:
         
 
         # 2) Detect all vials in frame
-        ret, points = self.detector(frame = frame)
+        ret, bboxes, points = self.detector(frame = frame)
 
         # 2.1) Draw on the (original) detections - red
         for point in points:
             crosshair(frame, point, size = 8, color = (0,0,255))
+        
+        # 2.1.2) Draw on the bounding boxes - blue
+        for bbox in bboxes:
+            cv2.rectangle(frame, bbox[0:2], bbox[2:4], (255,0,0), 2)
         
         # Define partial correction function for mapped application
         baseCorrectionFunc = partial(baseCorrection, y_object = 0.3, 

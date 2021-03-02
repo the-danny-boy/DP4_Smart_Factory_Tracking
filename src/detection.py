@@ -11,6 +11,8 @@ import cv2
 from acquisition import VideoStream
 from utility_functions import crosshair
 
+PROB_PLACEHOLDER = 0.3
+
 # Correction function to project detected point from neck of vial to base
 # in order to minimise disparity
 def baseCorrection(point, y_object = 0.3, y_camera = 6.0, 
@@ -50,6 +52,8 @@ def connectedFiltering(frame, mask, debug = False):
     (numLabels, labels, stats, centroids) = output
 
     points = []
+    bboxes = []
+
     debug_frame = frame.copy()
 
     # Iterate through detected blobs and extract statistics for filtering
@@ -63,30 +67,23 @@ def connectedFiltering(frame, mask, debug = False):
         # Extract centroid for given connected component
         (centroid_x, centroid_y) = centroids[i]
 
-        # Perform correction to find the base point
-        y_dim, x_dim = frame.shape[:2]
-        (corrected_x, corrected_y) = baseCorrection(centroids[i], y_max = y_dim, x_max = x_dim)
+        # Perform selection of connection components based on area
+        if area > 0 and area < 1500:
 
-        points.append((corrected_x, corrected_y))
+            # Add bounding box to list
+            bboxes.append((x, y, x + w, y + h, PROB_PLACEHOLDER))
 
-        if debug:
-            
-            # Perform selection of connection components based on area
-            if area > 0 and area < 1500:
-
+            if debug:
                 # Draw bounding box for connected component
                 cv2.rectangle(debug_frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
                 # Draw connected component centroid (red)
                 crosshair(debug_frame, (int(centroid_x), int(centroid_y)), color = (0, 0, 255))
-
-                # Draw corrected base point (green)
-                crosshair(debug_frame, (int(corrected_x), int(corrected_y)), color = (0, 255, 0))
-            
+        
                 # Show detection window if debug enabled
                 cv2.imshow("Detections", debug_frame)
 
-    return points
+    return bboxes, points
 
 
 # Hough Circle Detection Function
@@ -121,6 +118,8 @@ def houghDetect(frame, dp = 1.5, minDist = 20,
                                minRadius = minRadius, maxRadius = maxRadius)
     
         points = []
+        bboxes = []
+
         try:
 
             # Convet array to integers, and return x,y,r values
@@ -129,6 +128,9 @@ def houghDetect(frame, dp = 1.5, minDist = 20,
             for (x,y,r) in circles:
                     # Append circle centres to list
                     points.append((x,y))
+
+                    # Add bounding box to list
+                    bboxes.append((x-r, y-r, x+r, y+r, PROB_PLACEHOLDER))
                     
                     # Show detection window if debug enabled
                     if debug:
@@ -139,10 +141,10 @@ def houghDetect(frame, dp = 1.5, minDist = 20,
         except Exception as e:
             pass
 
-        return True, points
+        return True, bboxes, points
     
     except Exception as e:
-        return False, None
+        return False, None, None
 
 
 # Grayscale Detection Function
@@ -172,12 +174,12 @@ def hsvDetect(frame, hue_low = 0, hue_high = 179,
         # Segment the frame using the binary mask
         hsv_seg = cv2.bitwise_and(frame, frame, mask = mask)
 
-        points = connectedFiltering(frame, mask, debug)
+        bboxes, points = connectedFiltering(frame, mask, debug)
 
-        return True, points
+        return True, bboxes, points
     
     except:
-        return None, False
+        return False, None, None
 
 
 # Template Match Detection
@@ -201,7 +203,10 @@ def templateMatch(frame, placeholder = None,
         matched = cv2.matchTemplate(frame, template, method)
 
         debug_frame = frame.copy()
+
         points = []
+        bboxes = []
+
         max_val = 1
 
         # While matched points exist that are above the threshold
@@ -214,15 +219,16 @@ def templateMatch(frame, placeholder = None,
             if max_val > threshold:
                 matched[max_loc[1]-h//2:max_loc[1]+h//2+1, max_loc[0]-w//2:max_loc[0]+w//2+1] = 0   
                 points.append((int(max_loc[0]+(w+1)/2), int(max_loc[1] + (h+1)/2)))
+                bboxes.append((max_loc[0], max_loc[1], max_loc[0]+w+1, max_loc[1]+h+1, PROB_PLACEHOLDER))
         
                 if debug:
                     cv2.rectangle(debug_frame,(max_loc[0],max_loc[1]), (max_loc[0]+w+1, max_loc[1]+h+1), (0,255,0) )
                     cv2.imshow("Detections",debug_frame)
 
-        return True, points
+        return True, bboxes, points
     
     except:
-        return False, None
+        return False, None, None
 
 
 # Perform a sweep to benchmark detectors

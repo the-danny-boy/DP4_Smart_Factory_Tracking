@@ -27,7 +27,7 @@ sp = StreamProcessor(src = vs, detector = detector_func)
 while True:
 
     # Process next frame
-    ret, frame = sp.update(analyse = True)
+    ret, frame = sp.update(analyse = False)
 
     # Check if valid return flag
     if not ret:
