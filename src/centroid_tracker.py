@@ -5,6 +5,8 @@ This script provides the definition for the Centroid Tracker class.
 
 import cv2
 import numpy as np
+from scipy.spatial.distance import cdist
+import lap
 
 from acquisition import VideoStream
 from detection import houghDetect, baseCorrection
@@ -12,6 +14,7 @@ from utility_functions import crosshair
 
 from functools import partial
 from collections import deque
+from chrono import Timer
 
 
 class Centroid_Tracker(object):
@@ -46,7 +49,7 @@ class Centroid_Tracker(object):
 
     """
 
-    def __init__(self, max_lost = 3, seed = 0):
+    def __init__(self, max_lost = 3, seed = 0, max_samples = 5):
         """
         Parameters
         ----------
@@ -61,6 +64,7 @@ class Centroid_Tracker(object):
         self.dropped = {} 
         self.max_lost = max_lost
         self.seed = seed
+        self.max_samples = max_samples
 
 
     def register(self, objectID, centroid, time = 0, damage = 0.0, new = True):
@@ -89,7 +93,8 @@ class Centroid_Tracker(object):
         # If new assignment, increment the objectID counter
         if new:
             objectID += 1
-            return objectID
+        
+        return objectID
 
     
     def deregister(self, objectID):
@@ -104,23 +109,21 @@ class Centroid_Tracker(object):
         del self.dropped[objectID]
 
 
-    def update(self, points, objectID):
+    def update(self, objectID, points):
         """
         Parameters
         ----------
+        objectID : int
+            (Numeric) ID to be assigned next
+
         points : list
             List of detected points
-        
-        objeectID : int
-            (Numeric) ID to be assigned next
         """
         
-        # 1) Get all detected points
+        # Get detected points
         points = np.asarray(points)
 
-        # 2) Check number, and proceed accordingly
-
-        # 3) If none detected, decrement all trackers
+        # If none detected, decrement all trackers
         if len(points) == 0:
 
             # Iterate through objectIDs and increment drop count
@@ -134,19 +137,102 @@ class Centroid_Tracker(object):
             return objectID, self.objects
 
 
-        # 4) If detected, but none tracked, register all
-        if len(self.objects) == 0:
+        # If detected, but none tracked, register all
+        elif len(self.objects) == 0:
             for point in points:
                 objectID = self.register(objectID, point)
 
-        # 5) If detected and tracked, associate with previous (linear sum assignment / bipartite minimum weight matching problem)
-        #    Register / deregister the remaining points that aren't associated with previous detections
+
+        # Else, perform point association / matching (linear sum assignment)
+        # Add / remove trackers as appropriate based on number
+        else:
+
+            # Fetch point locations and ids
+            detected_pts = points
+            tracked_ids = list(self.objects.keys())
+            tracked_pts = [_object["positions"][-1] for _object in self.objects.values()]
+
+            #Find matches between points and tracked points       
+            cost_matrix = cdist(detected_pts, tracked_pts)
+            cost, x, y = lap.lapjv(cost_matrix, extend_cost=True)
+
+            # This gives the closest detected index for each tracked index
+            # Result in the form of [[detector_index], [tracker_index]]
+            matched_indices = np.array([[y[i],i] for i in x if i >= 0])
+
+            # Get unmatched detector indices (those not present in match result)
+            unmatched_detections = []
+            for d, detection in enumerate(detected_pts):
+                if d not in matched_indices[:, 0]:
+                    unmatched_detections.append(d)
+                
+            # Get unmatched tracker indices (those not present in match result)
+            unmatched_trackers = []
+            for d, detection in enumerate(tracked_pts):
+                if d not in matched_indices[:, 1]:
+                    unmatched_trackers.append(d)
+            
+            # Format match indices as required
+            # NOTE - could penalise or constrain based on cost
+            matches = []
+            for m in matched_indices:
+                matches.append(m.reshape(1,2))
+
+            # Populate the numpy match array using current match data
+            if(len(matches)==0):
+                matches = np.empty((0,2),dtype=int)
+            else:
+                matches = np.concatenate(matches,axis=0)
+
+            # Assign / update trackers for matching associations
+            for m in matches:
+
+                # Get ids (and positoin) from match array
+                detected_pt_idx = m[0]
+                tracker_pt_idx = m[1]
+                detected_pt_position = detected_pts[detected_pt_idx]
+
+                # Get current tracked object values
+                _positions = self.objects[tracked_ids[tracker_pt_idx]]["positions"]
+                _time = self.objects[tracked_ids[tracker_pt_idx]]["time"]
+                _damage = self.objects[tracked_ids[tracker_pt_idx]]["damage"]
+
+                # Update the position deque (limit to length = self.max_samples)
+                max_samples = 5
+                if len(_positions) > self.max_samples:
+                    _positions.popleft()
+                _positions.append(detected_pt_position)
+
+                # Increment time counter
+                _time += 1
+
+                # TODO - implement damage accumulation
+
+                # Assign values to corresponding tracker
+                self.objects[tracked_ids[tracker_pt_idx]] = \
+                    {"positions" : _positions, "time": _time, "damage": _damage}
+
+                # Reset drop flag
+                self.dropped[tracked_ids[tracker_pt_idx]] = 0
+
+
+            # For each unmatched detection point (no corresponding point)
+            # Register as new tracked object
+            for m in unmatched_detections:
+                objectID = self.register(objectID, detected_pts[m])
+
+            # For each unmatched (lost) tracker, decrement
+            for m in unmatched_trackers:
+                tracker_pt_idx = tracked_ids[m]
+                self.dropped[tracker_pt_idx] += 1
+
+                # If exceeding maximum drop count, deregister
+                if self.dropped[tracker_pt_idx] > self.max_lost:
+                    self.deregister(tracker_pt_idx)
 
 
         # Return objectID and tracked objects (with associated data)
         return objectID, self.objects
-
- 
 
     
 if __name__ == "__main__":
@@ -167,38 +253,58 @@ if __name__ == "__main__":
     objectID = 1
 
     while True:
-        # Process next frame
-        ret, frame = next(vs.read())
-        if not ret:
-            break
 
-        ret, bboxes, points = detector_func(frame = frame)
+        with Timer() as timed:
+        
+            # Process next frame
+            ret, frame = next(vs.read())
+            if not ret:
+                break
 
-        baseCorrectionFunc = partial(baseCorrection, y_object = 0.3, 
-                y_camera = 6.0, x_max = frame.shape[1], y_max = frame.shape[0], strength = 1.8)
+            ret, bboxes, points = detector_func(frame = frame)
 
-        # Apply baseCorrection to all detected points
-        corrected_points = list(map(baseCorrectionFunc, points))
+            baseCorrectionFunc = partial(baseCorrection, y_object = 0.3, 
+                    y_camera = 6.0, x_max = frame.shape[1], y_max = frame.shape[0], strength = 1.8)
 
-        # Placeholder tracker interface
-        # Input points, ID => output ID, objects
-        objectID, trackedObjects = tracker.update(corrected_points, objectID)
-        print(trackedObjects)
+            # Apply baseCorrection to all detected points
+            corrected_points = list(map(baseCorrectionFunc, points))
 
-        if ret:
-            for point in corrected_points:
-                crosshair(frame, point, size = 8, color = (0,0,255))
+            # Update tracker
+            objectID, trackedObjects = tracker.update(objectID, corrected_points)
 
-        # Display frame contents
-        cv2.imshow("Frame", frame)
+            # Iterate through tracked objects
+            for idx, object in zip(trackedObjects.keys(), trackedObjects.values()):
 
-        # Wait 16ms for user input - simulating 60FPS
-        # Note - could synchronise with timer and moving average for more control
-        key = cv2.waitKey(16) & 0xFF
+                # Draw crosshair
+                crosshair(frame, object["positions"][-1], size = 8, color = (0,0,255))
 
-        # Escape / close if "q" pressed
-        if key == ord("q"):
-            break
+                # Assign label for object id
+                text = str(idx)
+                font = cv2.FONT_HERSHEY_PLAIN
+                fontScale = 1
+                (text_width, text_height) = cv2.getTextSize(text, font, fontScale = fontScale, thickness = 2)[0]
+                text_offset_x = object["positions"][-1][0]
+                text_offset_y = object["positions"][-1][1] - 10
+                cv2.putText(frame, text, (int(text_offset_x - text_width/2), int(text_offset_y + text_height/2)), 
+                        font, fontScale = fontScale, color = (0,255,0), thickness = 2)
+
+            """if ret:
+                for point in corrected_points:
+                    crosshair(frame, point, size = 8, color = (0,0,255))"""
+
+
+            # Display frame contents
+            cv2.imshow("Frame", frame)
+
+            # Wait 16ms for user input - simulating 60FPS
+            # Note - could synchronise with timer and moving average for more control
+            key = cv2.waitKey(16) & 0xFF
+
+            # Escape / close if "q" pressed
+            if key == ord("q"):
+                break
+        
+        print("Elapsed Time:", timed.elapsed)
 
     vs.stop()
     cv2.destroyAllWindows()
