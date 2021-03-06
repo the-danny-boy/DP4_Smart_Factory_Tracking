@@ -46,7 +46,7 @@ class Centroid_Tracker(object):
 
     """
 
-    def __init__(self, max_lost=3, seed = 0):
+    def __init__(self, max_lost = 3, seed = 0):
         """
         Parameters
         ----------
@@ -121,6 +121,18 @@ class Centroid_Tracker(object):
         # 2) Check number, and proceed accordingly
 
         # 3) If none detected, decrement all trackers
+        if len(points) == 0:
+
+            # Iterate through objectIDs and increment drop count
+            for objectID in list(self.dropped.keys()):
+                self.dropped[objectID] += 1
+
+                # If exceeding maximum drop count, deregister
+                if self.dropped[objectID] > self.max_lost:
+                    self.deregister(objectID)
+
+            return objectID, self.objects
+
 
         # 4) If detected, but none tracked, register all
 
@@ -148,7 +160,7 @@ if __name__ == "__main__":
                                      minRadius = 12, maxRadius = 15, debug = False)
 
     # Create Tracker
-    tracker = Centroid_Tracker()
+    tracker = Centroid_Tracker(max_lost = 3, seed = 0)
     objectID = 1
 
     while True:
@@ -168,6 +180,7 @@ if __name__ == "__main__":
         # Placeholder tracker interface
         # Input points, ID => output ID, objects
         objectID, trackedObjects = tracker.update(corrected_points, objectID)
+        print(trackedObjects)
 
         if ret:
             for point in corrected_points:
