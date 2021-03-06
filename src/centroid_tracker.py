@@ -135,6 +135,9 @@ class Centroid_Tracker(object):
 
 
         # 4) If detected, but none tracked, register all
+        if len(self.objects) == 0:
+            for point in points:
+                objectID = self.register(objectID, point)
 
         # 5) If detected and tracked, associate with previous (linear sum assignment / bipartite minimum weight matching problem)
         #    Register / deregister the remaining points that aren't associated with previous detections
