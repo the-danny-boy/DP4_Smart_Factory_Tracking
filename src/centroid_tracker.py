@@ -49,7 +49,7 @@ class Centroid_Tracker(object):
 
     """
 
-    def __init__(self, max_lost = 3, seed = 0, max_samples = 5):
+    def __init__(self, max_lost = 3, seed = 0, max_samples = 5, cost_threshold = 50):
         """
         Parameters
         ----------
@@ -58,6 +58,12 @@ class Centroid_Tracker(object):
 
         seed : int
             Numeric seed used to designate starting integer
+        
+        max_samples : int
+            Number of positions to be stored in the deque
+        
+        cost_threshold : int
+            Threshold cost for association with existing point (vs new detection)
         """
 
         self.objects = {}
@@ -65,6 +71,7 @@ class Centroid_Tracker(object):
         self.max_lost = max_lost
         self.seed = seed
         self.max_samples = max_samples
+        self.cost_threshold = cost_threshold
 
 
     def register(self, objectID, centroid, time = 0, damage = 0.0, new = True):
@@ -172,11 +179,16 @@ class Centroid_Tracker(object):
                 if d not in matched_indices[:, 1]:
                     unmatched_trackers.append(d)
             
-            # Format match indices as required
-            # NOTE - could penalise or constrain based on cost
             matches = []
             for m in matched_indices:
-                matches.append(m.reshape(1,2))
+                # If cost (distance) too great, treat as new unmatched point
+                if cost_matrix[m[0], m[1]] > self.cost_threshold:
+                    unmatched_detections.append(m[0])
+                    unmatched_trackers.append(m[1])
+                
+                # Otherwise, retain current match
+                else:
+                    matches.append(m.reshape(1,2))
 
             # Populate the numpy match array using current match data
             if(len(matches)==0):
@@ -198,7 +210,6 @@ class Centroid_Tracker(object):
                 _damage = self.objects[tracked_ids[tracker_pt_idx]]["damage"]
 
                 # Update the position deque (limit to length = self.max_samples)
-                max_samples = 5
                 if len(_positions) > self.max_samples:
                     _positions.popleft()
                 _positions.append(detected_pt_position)
@@ -249,7 +260,7 @@ if __name__ == "__main__":
                                      minRadius = 12, maxRadius = 15, debug = False)
 
     # Create Tracker
-    tracker = Centroid_Tracker(max_lost = 3, seed = 0)
+    tracker = Centroid_Tracker(max_lost = 3, seed = 0, max_samples = 5, cost_threshold = 50)
     objectID = 1
 
     while True:
