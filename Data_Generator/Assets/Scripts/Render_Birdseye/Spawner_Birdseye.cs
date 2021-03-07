@@ -22,6 +22,8 @@ public class Spawner_Birdseye : MonoBehaviour
     Camera cam;
 
     Object_Pooler objectPooler;
+
+    int fileCounter = 0;
     
 
     // Start is called before the first frame update
@@ -85,7 +87,57 @@ public class Spawner_Birdseye : MonoBehaviour
                 }
             }
         }
+
+        for (int i = 0; i < spawnedGameObjects.Count; i++)
+        {
+            GameObject currentGameObject = spawnedGameObjects[i];
+            if(currentGameObject.activeSelf)
+            {
+                // var renderer = currentGameObject.GetComponent<Renderer>();
+                // Debug.Log(renderer.bounds);
+
+                // Testing getting the centre of the neck
+                // GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                // sphere.transform.position = renderer.bounds.center + new Vector3(0f, renderer.bounds.extents.y, 0f);
+                // sphere.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            }
+        }
+
+        // Save out the current camera view
+        saveCameraView();
+
     }
+
+
+    // Save camera view to PNG
+    void saveCameraView()
+    {
+        // Extract render target and modify attributes, e.g. colour space and format
+        RenderTexture rt = cam.targetTexture;
+        RenderTexture mRt = new RenderTexture(rt.width, rt.height, rt.depth, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+        mRt.antiAliasing = rt.antiAliasing;
+
+        // Assign modified render target
+        cam.targetTexture = mRt;
+        RenderTexture.active = cam.targetTexture;
+
+        // Manually render camera view to render target
+        cam.Render();
+ 
+        // Read the render target
+        Texture2D Image = new Texture2D(cam.targetTexture.width, cam.targetTexture.height);
+        Image.ReadPixels(new Rect(0, 0, cam.targetTexture.width, cam.targetTexture.height), 0, 0);
+        Image.Apply();
+ 
+        // Extract image as bytes (in PNG format), then dispose of object
+        var Bytes = Image.EncodeToPNG();
+        Destroy(Image);
+ 
+        // Write to file and increment file counter
+        File.WriteAllBytes("Data_Generator_Outputs/" + fileCounter + ".png", Bytes);
+        fileCounter++;
+    }
+
 
     // Spawn function - generates points and instantiates game objects at them
     void Spawn()
