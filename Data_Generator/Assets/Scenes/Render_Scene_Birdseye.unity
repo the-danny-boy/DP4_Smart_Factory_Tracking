@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 559.4463, g: 850.1753, b: 1191.1211, a: 1}
+  m_IndirectSpecularColor: {r: 559.4404, g: 850.17773, b: 1191.1172, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -406,10 +406,8 @@ MonoBehaviour:
   COM_height: 0
   spawnExtents: {x: 10.7, y: 7.4}
   rejectionNumber: 50
-  radius: 0.8
+  radius: 1
   spawnLimit: 100
-  initial_spawn: 0
-  spawn_period: 1
   cameraGameObject: {fileID: 815392820}
 --- !u!4 &599215263
 Transform:

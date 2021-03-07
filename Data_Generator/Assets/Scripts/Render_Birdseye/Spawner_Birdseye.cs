@@ -16,9 +16,6 @@ public class Spawner_Birdseye : MonoBehaviour
     [SerializeField] private float radius = 10f;
     [SerializeField] private int spawnLimit = 10;
 
-    [SerializeField] private float initial_spawn = 0.0f;
-    [SerializeField] private float spawn_period = 1.0f;
-
     private List<GameObject> spawnedGameObjects = new List<GameObject>();
 
     public GameObject cameraGameObject;
@@ -58,20 +55,68 @@ public class Spawner_Birdseye : MonoBehaviour
             // Move spawned object to new sampled 3D point
             Vector2 point = points[i];
             Vector3 _pt3D = new Vector3(point.x - spawnExtents.x / 2f, COM_height, point.y - spawnExtents.y / 2f) + this.transform.position;
-            spawnedGameObjects[i].transform.position = _pt3D;
-        }
 
+            // Generate overlap capsule for occupancy test
+            Vector3 _pt1 = new Vector3(_pt3D.x, 0f, _pt3D.z);
+            Vector3 _pt2 = new Vector3(_pt3D.x, 1f, _pt3D.z);
+            Collider[] colliders = Physics.OverlapCapsule(_pt1, _pt2, 0.1f);
+
+            // If no collisions, reposition or instantiate new
+            if (colliders.Length == 0)
+            {
+                if (i < spawnedGameObjects.Count)
+                {
+                    spawnedGameObjects[i].transform.position = _pt3D;
+                }
+                else
+                {
+                    GameObject _instantiatedObject = Instantiate(spawnTemplateGameObject, _pt3D, Quaternion.Euler(-90,0,0));
+                    spawnedGameObjects.Add(_instantiatedObject);
+                }
+            }
+
+            // Otherwise delete object without repositioning
+            else
+            {
+                if (i < spawnedGameObjects.Count)
+                {
+                    GameObject item = spawnedGameObjects[i];
+                    spawnedGameObjects.Remove(item);
+                    Destroy(item);
+                }
+            }
+        }
     }
 
     // Spawn function - generates points and instantiates game objects at them
     void Spawn()
     {
+
+        // Sample 2D points using Poisson Disc Sampling technique
         List<Vector2> points = PoissonDiscSample(radius, spawnExtents, rejectionNumber, spawnLimit);
         foreach (Vector2 point in points)
         {
+            
+            // Reposition points to target 3D domain
             Vector3 _pt3D = new Vector3(point.x - spawnExtents.x / 2f, COM_height, point.y - spawnExtents.y / 2f) + this.transform.position;
-            GameObject _instantiatedObject = Instantiate(spawnTemplateGameObject, _pt3D, Quaternion.Euler(-90,0,0));
-            spawnedGameObjects.Add(_instantiatedObject);
+
+            // Simple test for occupancy using cylinder volume
+            Vector3 _pt1 = new Vector3(_pt3D.x, 0f, _pt3D.z);
+            Vector3 _pt2 = new Vector3(_pt3D.x, 1f, _pt3D.z);
+            Collider[] colliders = Physics.OverlapCapsule(_pt1, _pt2, 0.1f);
+
+            // Instantiate if not occupied
+            if (colliders.Length == 0)
+            {
+                GameObject _instantiatedObject = Instantiate(spawnTemplateGameObject, _pt3D, Quaternion.Euler(-90,0,0));
+                spawnedGameObjects.Add(_instantiatedObject);
+
+                // NOTE - Used to check bounds in editor => (0.1, 0.3, 0.1)
+                // var renderer = _instantiatedObject.GetComponent<Renderer>();
+                // Debug.Log(renderer.bounds);
+            }
+
+            
         }
     }
 
