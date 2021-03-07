@@ -21,14 +21,16 @@ public class Spawner_Birdseye : MonoBehaviour
     public GameObject cameraGameObject;
     Camera cam;
 
+    Object_Pooler objectPooler;
+    
+
     // Start is called before the first frame update
     void Start()
     {
-
+        objectPooler = Object_Pooler.Instance;
         cam = cameraGameObject.GetComponent<Camera>();
         Physics.gravity = new Vector3(0f,0f,0f);
         Random.InitState(42);
-        Spawn();
 
     }
 
@@ -43,9 +45,6 @@ public class Spawner_Birdseye : MonoBehaviour
     // Used to update the vial positions
     void Update()
     {
-        // Update component positions and take new screenshot
-        // Spawn in area just larger than camera with random number and density up to full
-
         // Generate new list of points using Poisson Disc Sampling
         List<Vector2> points = PoissonDiscSample(radius, spawnExtents, rejectionNumber, spawnLimit);
 
@@ -61,28 +60,28 @@ public class Spawner_Birdseye : MonoBehaviour
             Vector3 _pt2 = new Vector3(_pt3D.x, 1f, _pt3D.z);
             Collider[] colliders = Physics.OverlapCapsule(_pt1, _pt2, 0.1f);
 
-            // If no collisions, reposition or instantiate new
+            // If no collisions, reposition or pull new from pool
             if (colliders.Length == 0)
             {
                 if (i < spawnedGameObjects.Count)
                 {
                     spawnedGameObjects[i].transform.position = _pt3D;
+                    spawnedGameObjects[i].SetActive(true);
                 }
                 else
                 {
-                    GameObject _instantiatedObject = Instantiate(spawnTemplateGameObject, _pt3D, Quaternion.Euler(-90,0,0));
+                    GameObject _instantiatedObject = objectPooler.SpawnFromPool("Vial", _pt3D, Quaternion.Euler(-90,0,0));
                     spawnedGameObjects.Add(_instantiatedObject);
                 }
             }
 
-            // Otherwise delete object without repositioning
+            // Otherwise deactivate object without repositioning
             else
             {
                 if (i < spawnedGameObjects.Count)
                 {
                     GameObject item = spawnedGameObjects[i];
-                    spawnedGameObjects.Remove(item);
-                    Destroy(item);
+                    item.SetActive(false);
                 }
             }
         }
@@ -91,7 +90,6 @@ public class Spawner_Birdseye : MonoBehaviour
     // Spawn function - generates points and instantiates game objects at them
     void Spawn()
     {
-
         // Sample 2D points using Poisson Disc Sampling technique
         List<Vector2> points = PoissonDiscSample(radius, spawnExtents, rejectionNumber, spawnLimit);
         foreach (Vector2 point in points)
@@ -108,7 +106,8 @@ public class Spawner_Birdseye : MonoBehaviour
             // Instantiate if not occupied
             if (colliders.Length == 0)
             {
-                GameObject _instantiatedObject = Instantiate(spawnTemplateGameObject, _pt3D, Quaternion.Euler(-90,0,0));
+                //GameObject _instantiatedObject = Instantiate(spawnTemplateGameObject, _pt3D, Quaternion.Euler(-90,0,0));
+                GameObject _instantiatedObject = objectPooler.SpawnFromPool("Vial", _pt3D, Quaternion.Euler(-90,0,0));
                 spawnedGameObjects.Add(_instantiatedObject);
 
                 // NOTE - Used to check bounds in editor => (0.1, 0.3, 0.1)
@@ -124,7 +123,6 @@ public class Spawner_Birdseye : MonoBehaviour
     // Function to generate list of sampled points from annular disc
     List<Vector2> PoissonDiscSample(float _radius, Vector2 _spawnExtents, int _rejectionNumber, int _spawnLimit)
     {
-
         // Initialise some variables
         int spawnCount = 0;
         List<Vector2> points = new List<Vector2>();
