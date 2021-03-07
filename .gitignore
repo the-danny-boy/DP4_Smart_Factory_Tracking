@@ -133,3 +133,4 @@ vendor/
 
 # Ignore virtual environment folder
 Virtual_Environments/
+Data_Generator/Data_Generator_Outputs/

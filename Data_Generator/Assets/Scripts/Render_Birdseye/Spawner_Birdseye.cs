@@ -110,8 +110,8 @@ public class Spawner_Birdseye : MonoBehaviour
                 Vector2 correctedBoundsPt = new Vector2(screenBoundsPt.x, cam.pixelHeight-screenBoundsPt.y);
 
                 // Calculate all YOLO data
-                float x = screenBoundsPt.x / cam.pixelWidth;
-                float y = screenBoundsPt.y / cam.pixelHeight;
+                float x = correctedScreenCentrePt.x / cam.pixelWidth;
+                float y = correctedScreenCentrePt.y / cam.pixelHeight;
                 float width = 2 * (correctedBoundsPt.x - correctedScreenCentrePt.x) / cam.pixelWidth;
                 float height = 2 * (correctedScreenCentrePt.y - correctedBoundsPt.y) / cam.pixelHeight;
                 float[] yoloData = {0f, x, y, width, height};
