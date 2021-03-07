@@ -24,7 +24,8 @@ public class Spawner_Birdseye : MonoBehaviour
     Object_Pooler objectPooler;
 
     int fileCounter = 0;
-    
+    List<Vector2> position_data;
+
 
     // Start is called before the first frame update
     void Start()
@@ -33,8 +34,9 @@ public class Spawner_Birdseye : MonoBehaviour
         cam = cameraGameObject.GetComponent<Camera>();
         Physics.gravity = new Vector3(0f,0f,0f);
         Random.InitState(42);
-
+        position_data = new List<Vector2>();
     }
+
 
     // Gizmo draw function to visualise the spawn area
     void OnDrawGizmosSelected()
@@ -42,6 +44,7 @@ public class Spawner_Birdseye : MonoBehaviour
         Gizmos.color = new Color(0f,1f,1f);
         Gizmos.DrawWireCube(this.transform.position + new Vector3(0f, 1/2f,0f), new Vector3(spawnExtents.x, 1f, spawnExtents.y));
     }
+
 
     // Update function - called every time a frame is drawn
     // Used to update the vial positions
@@ -58,9 +61,9 @@ public class Spawner_Birdseye : MonoBehaviour
             Vector3 _pt3D = new Vector3(point.x - spawnExtents.x / 2f, COM_height, point.y - spawnExtents.y / 2f) + this.transform.position;
 
             // Generate overlap capsule for occupancy test
-            Vector3 _pt1 = new Vector3(_pt3D.x, 0f, _pt3D.z);
+            Vector3 _pt1 = new Vector3(_pt3D.x, 0.5f, _pt3D.z);
             Vector3 _pt2 = new Vector3(_pt3D.x, 1f, _pt3D.z);
-            Collider[] colliders = Physics.OverlapCapsule(_pt1, _pt2, 0.1f);
+            Collider[] colliders = Physics.OverlapCapsule(_pt1, _pt2, 0.5f);
 
             // If no collisions, reposition or pull new from pool
             if (colliders.Length == 0)
@@ -88,24 +91,40 @@ public class Spawner_Birdseye : MonoBehaviour
             }
         }
 
+        position_data = new List<Vector2>();
         for (int i = 0; i < spawnedGameObjects.Count; i++)
         {
             GameObject currentGameObject = spawnedGameObjects[i];
             if(currentGameObject.activeSelf)
-            {
-                // var renderer = currentGameObject.GetComponent<Renderer>();
-                // Debug.Log(renderer.bounds);
+            {                
+                var renderer = currentGameObject.GetComponent<Renderer>();
 
-                // Testing getting the centre of the neck
-                // GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                // sphere.transform.position = renderer.bounds.center + new Vector3(0f, renderer.bounds.extents.y, 0f);
-                // sphere.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                // Get screen point corresponding to vial neck centre
+                Vector3 centrePt = renderer.bounds.center + new Vector3(0f, renderer.bounds.extents.y, 0f);
+                Vector3 screenCentrePt = cam.WorldToScreenPoint(centrePt);
+                Vector2 correctedScreenCentrePt = new Vector2(screenCentrePt.x, cam.pixelHeight-screenCentrePt.y);
+
+                // Get screen point corresponding to corner of bounding box for vial neck (centre + extents)
+                Vector3 boundsPt = renderer.bounds.center + new Vector3(renderer.bounds.extents.x, renderer.bounds.extents.y, renderer.bounds.extents.z);
+                Vector3 screenBoundsPt = cam.WorldToScreenPoint(boundsPt);
+                Vector2 correctedBoundsPt = new Vector2(screenBoundsPt.x, cam.pixelHeight-screenBoundsPt.y);
+
+                //position_data.Add(correctedScreenCentrePt);
             }
         }
 
-        // Save out the current camera view
-        saveCameraView();
+        // Write contents of position data list to string
+        string writeText = "";
+        foreach(Vector2 _data in position_data)
+        {
+            writeText += Convert.ToString(_data.x) + " " + Convert.ToString(_data.y) + "\n";
+        }
 
+        // Write to file
+        File.WriteAllText("Data_Generator_Outputs/" + fileCounter + ".txt", writeText);
+
+        // Save out accompanying image
+        saveCameraView();
     }
 
 
@@ -129,47 +148,15 @@ public class Spawner_Birdseye : MonoBehaviour
         Image.ReadPixels(new Rect(0, 0, cam.targetTexture.width, cam.targetTexture.height), 0, 0);
         Image.Apply();
  
-        // Extract image as bytes (in PNG format), then dispose of object
-        var Bytes = Image.EncodeToPNG();
+        // Extract image as bytes (in JPG format), then dispose of object
+        var Bytes = Image.EncodeToJPG();
         Destroy(Image);
  
         // Write to file and increment file counter
-        File.WriteAllBytes("Data_Generator_Outputs/" + fileCounter + ".png", Bytes);
+        File.WriteAllBytes("Data_Generator_Outputs/" + fileCounter + ".jpg", Bytes);
         fileCounter++;
     }
 
-
-    // Spawn function - generates points and instantiates game objects at them
-    void Spawn()
-    {
-        // Sample 2D points using Poisson Disc Sampling technique
-        List<Vector2> points = PoissonDiscSample(radius, spawnExtents, rejectionNumber, spawnLimit);
-        foreach (Vector2 point in points)
-        {
-            
-            // Reposition points to target 3D domain
-            Vector3 _pt3D = new Vector3(point.x - spawnExtents.x / 2f, COM_height, point.y - spawnExtents.y / 2f) + this.transform.position;
-
-            // Simple test for occupancy using cylinder volume
-            Vector3 _pt1 = new Vector3(_pt3D.x, 0f, _pt3D.z);
-            Vector3 _pt2 = new Vector3(_pt3D.x, 1f, _pt3D.z);
-            Collider[] colliders = Physics.OverlapCapsule(_pt1, _pt2, 0.1f);
-
-            // Instantiate if not occupied
-            if (colliders.Length == 0)
-            {
-                //GameObject _instantiatedObject = Instantiate(spawnTemplateGameObject, _pt3D, Quaternion.Euler(-90,0,0));
-                GameObject _instantiatedObject = objectPooler.SpawnFromPool("Vial", _pt3D, Quaternion.Euler(-90,0,0));
-                spawnedGameObjects.Add(_instantiatedObject);
-
-                // NOTE - Used to check bounds in editor => (0.1, 0.3, 0.1)
-                // var renderer = _instantiatedObject.GetComponent<Renderer>();
-                // Debug.Log(renderer.bounds);
-            }
-
-            
-        }
-    }
 
     // Inspired by the following paper: https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
     // Function to generate list of sampled points from annular disc
@@ -229,6 +216,7 @@ public class Spawner_Birdseye : MonoBehaviour
         // Return sampled points
         return points;
     }
+
 
     // Function to check validity of point according to spacing criterion
     bool placementCheck(Vector2 position, Vector2 _spawnExtents, float cellSize, float _radius, List<Vector2> points, int[,] backgroundGrid)
