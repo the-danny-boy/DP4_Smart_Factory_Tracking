@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 559.06714, g: 849.18555, b: 1189.8477, a: 1}
+  m_IndirectSpecularColor: {r: 559.4463, g: 850.1753, b: 1191.1211, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -402,12 +402,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c85bced9a9a653047a6ea855e50a1816, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnTemplateGameObject: {fileID: 9052127805091352771, guid: 3511c77b831c90ca4866e1ca7e39c03c, type: 3}
+  spawnTemplateGameObject: {fileID: 9052127805091352771, guid: 4c3f28435bbd4f6e5b38f7cd62a8957e, type: 3}
   COM_height: 0
-  spawnExtents: {x: 20, y: 20}
+  spawnExtents: {x: 10.7, y: 7.4}
   rejectionNumber: 50
-  radius: 10
-  spawnLimit: 10
+  radius: 0.8
+  spawnLimit: 100
   initial_spawn: 0
   spawn_period: 1
   cameraGameObject: {fileID: 815392820}
@@ -419,7 +419,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 599215261}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -12.7}
+  m_LocalPosition: {x: 0, y: 0, z: -21.02}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

@@ -35,11 +35,32 @@ public class Spawner_Birdseye : MonoBehaviour
 
     }
 
+    // Gizmo draw function to visualise the spawn area
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(0f,1f,1f);
+        Gizmos.DrawWireCube(this.transform.position + new Vector3(0f, 1/2f,0f), new Vector3(spawnExtents.x, 1f, spawnExtents.y));
+    }
+
     // Update function - called every time a frame is drawn
+    // Used to update the vial positions
     void Update()
     {
         // Update component positions and take new screenshot
         // Spawn in area just larger than camera with random number and density up to full
+
+        // Generate new list of points using Poisson Disc Sampling
+        List<Vector2> points = PoissonDiscSample(radius, spawnExtents, rejectionNumber, spawnLimit);
+
+        // Iterate through all points
+        for( int i = 0; i < points.Count; i++)
+        {
+            // Move spawned object to new sampled 3D point
+            Vector2 point = points[i];
+            Vector3 _pt3D = new Vector3(point.x - spawnExtents.x / 2f, COM_height, point.y - spawnExtents.y / 2f) + this.transform.position;
+            spawnedGameObjects[i].transform.position = _pt3D;
+        }
+
     }
 
     // Spawn function - generates points and instantiates game objects at them
