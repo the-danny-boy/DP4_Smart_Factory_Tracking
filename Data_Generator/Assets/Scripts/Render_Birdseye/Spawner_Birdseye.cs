@@ -24,7 +24,7 @@ public class Spawner_Birdseye : MonoBehaviour
     Object_Pooler objectPooler;
 
     int fileCounter = 0;
-    List<Vector2> position_data;
+    List<float[]> position_data;
 
 
     // Start is called before the first frame update
@@ -34,7 +34,7 @@ public class Spawner_Birdseye : MonoBehaviour
         cam = cameraGameObject.GetComponent<Camera>();
         Physics.gravity = new Vector3(0f,0f,0f);
         Random.InitState(42);
-        position_data = new List<Vector2>();
+        position_data = new List<float[]>();
     }
 
 
@@ -91,7 +91,7 @@ public class Spawner_Birdseye : MonoBehaviour
             }
         }
 
-        position_data = new List<Vector2>();
+        position_data = new List<float[]>();
         for (int i = 0; i < spawnedGameObjects.Count; i++)
         {
             GameObject currentGameObject = spawnedGameObjects[i];
@@ -109,15 +109,26 @@ public class Spawner_Birdseye : MonoBehaviour
                 Vector3 screenBoundsPt = cam.WorldToScreenPoint(boundsPt);
                 Vector2 correctedBoundsPt = new Vector2(screenBoundsPt.x, cam.pixelHeight-screenBoundsPt.y);
 
-                //position_data.Add(correctedScreenCentrePt);
+                // Calculate all YOLO data
+                float x = screenBoundsPt.x / cam.pixelWidth;
+                float y = screenBoundsPt.y / cam.pixelHeight;
+                float width = 2 * (correctedBoundsPt.x - correctedScreenCentrePt.x) / cam.pixelWidth;
+                float height = 2 * (correctedScreenCentrePt.y - correctedBoundsPt.y) / cam.pixelHeight;
+                float[] yoloData = {0f, x, y, width, height};
+
+                // Check for validity (in range 0-1), and add to list if true
+                // Note - can do in the following way as single class id = 0
+                if (Mathf.Min(yoloData) >= 0f && Mathf.Max(yoloData) <= 1f)
+                    position_data.Add(yoloData);
             }
         }
 
-        // Write contents of position data list to string
+        // Format contents of position data to string delimited by newline
         string writeText = "";
-        foreach(Vector2 _data in position_data)
+        foreach(float[] _data in position_data)
         {
-            writeText += Convert.ToString(_data.x) + " " + Convert.ToString(_data.y) + "\n";
+            string dataString = String.Join(" ", _data);
+            writeText += dataString + "\n";   
         }
 
         // Write to file
