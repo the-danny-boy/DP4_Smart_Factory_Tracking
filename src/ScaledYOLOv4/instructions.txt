@@ -1,0 +1,5 @@
+Train instructions=========================================================================
+python train.py --device 0 --batch-size 16 --epochs 50 --data <DETECTION_YAML_FILE> --cfg <TARGET_YAML_CONFIG_FILE> --weights '' --name <MODEL_NAME> --img-size 416 --cache
+
+Test / Inference instructions==============================================================
+python detect.py --weights <CHECKPOINT_PATH> --img 416 --conf 0.4 --source <IMAGE_TARGET_FOLDER>

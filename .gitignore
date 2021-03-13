@@ -134,3 +134,11 @@ vendor/
 # Ignore virtual environment folder
 Virtual_Environments/
 Data_Generator/Data_Generator_Outputs/
+
+# Ignore training data, but maintain folder structure
+src/ScaledYOLOv4/vials/*/*/*
+!src/ScaledYOLOv4/vials/*/*/.gitkeep
+
+# Ignore redundant checkpoint / run files
+src/ScaledYOLOv4/runs/*/weights/*
+!src/ScaledYOLOv4/runs/*/weights/best_*_strip.pt
