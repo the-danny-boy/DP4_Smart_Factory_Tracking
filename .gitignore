@@ -141,4 +141,5 @@ src/ScaledYOLOv4/vials/*/*/*
 
 # Ignore redundant checkpoint / run files
 src/ScaledYOLOv4/runs/*/weights/*
-!src/ScaledYOLOv4/runs/*/weights/best_*_strip.pt
+#!src/ScaledYOLOv4/runs/*/weights/best_*_strip.pt
+#Ignore all checkpoints, as too large
