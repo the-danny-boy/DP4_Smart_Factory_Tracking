@@ -39,7 +39,9 @@ def trackbarSetup(window_name, detector_type):
                       "Value High":[0,255]}
 
     elif detector_type == "template":
-        parameters = {"Placeholder":[0,1]}
+        parameters = {"threshold":[80,100], #Note: scaled by 100
+                      "template_img [static, average, average_crop]": [0,2]} 
+                      #40 for 0, 50 for 1, 70 for 2
         pass
 
     for p, v in zip(parameters.keys(), parameters.values()):
@@ -69,7 +71,7 @@ if __name__ == "__main__":
     # Select the appropriate detector (if available)
     detector_type = detector_types[detector_sel]
     detector_func = detector_funcs[detector_sel]
-
+    
     # Create a window with the allocated name
     window_name = "Detector Tuning Utility : " + detector_type
     cv2.namedWindow(window_name)    
@@ -95,7 +97,7 @@ if __name__ == "__main__":
         for index, parameter in enumerate(parameters.keys()):
             parameter_settings[index] = cv2.getTrackbarPos(parameter, window_name)
 
-        # Apply detecto (and show debug visualisation window)
+        # Apply detector (and show debug visualisation window)
         ret, bboxes, points = detector_func(frame, *parameter_settings, debug = True)
         
         # If successful detection, visualise with blue crosshairs in same window

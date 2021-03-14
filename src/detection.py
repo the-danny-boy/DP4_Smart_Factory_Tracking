@@ -183,12 +183,15 @@ def hsvDetect(frame, hue_low = 0, hue_high = 179,
 
 
 # Template Match Detection
-def templateMatch(frame, placeholder = None, 
-                         template_path = "Template.png", debug = False):
+def templateMatch(frame, match_threshold = 400,
+                        template_path_idx = 0, debug = False):
     try:
     
+        template_paths = ["Template.png", "Template_Averaged_half.png",
+                          "Template_Averaged_half_crop.png"] # Template_Averaged.png
+
         # Load template image
-        template = cv2.imread(template_path)
+        template = cv2.imread(template_paths[template_path_idx])
 
         # Extract dimensions
         h, w = template.shape[:2]
@@ -196,8 +199,8 @@ def templateMatch(frame, placeholder = None,
         # Select method for template matching
         method = cv2.TM_CCOEFF_NORMED
 
-        # Set match threshold
-        threshold = 0.40
+        # Set match threshold (scaled to match trackbar integer scale)
+        threshold = match_threshold/100
 
         # Perform matching
         matched = cv2.matchTemplate(frame, template, method)
@@ -220,7 +223,6 @@ def templateMatch(frame, placeholder = None,
                 matched[max_loc[1]-h//2:max_loc[1]+h//2+1, max_loc[0]-w//2:max_loc[0]+w//2+1] = 0   
                 points.append((int(max_loc[0]+(w+1)/2), int(max_loc[1] + (h+1)/2)))
                 bboxes.append((max_loc[0], max_loc[1], max_loc[0]+w+1, max_loc[1]+h+1, PROB_PLACEHOLDER))
-        
                 if debug:
                     cv2.rectangle(debug_frame,(max_loc[0],max_loc[1]), (max_loc[0]+w+1, max_loc[1]+h+1), (0,255,0) )
                     cv2.imshow("Detections",debug_frame)
