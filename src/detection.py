@@ -11,6 +11,7 @@ import cv2
 from acquisition import VideoStream
 from utility_functions import crosshair
 
+CLASS_PLACEHOLDER = 0
 PROB_PLACEHOLDER = 0.3
 
 # Correction function to project detected point from neck of vial to base
@@ -71,7 +72,7 @@ def connectedFiltering(frame, mask, debug = False):
         if area > 0 and area < 1500:
 
             # Add bounding box to list
-            bboxes.append((x, y, x + w, y + h, PROB_PLACEHOLDER))
+            bboxes.append((x, y, x + w, y + h, PROB_PLACEHOLDER, CLASS_PLACEHOLDER))
 
             if debug:
                 # Draw bounding box for connected component
@@ -130,7 +131,7 @@ def houghDetect(frame, dp = 1.5, minDist = 20,
                     points.append((x,y))
 
                     # Add bounding box to list
-                    bboxes.append((x-r, y-r, x+r, y+r, PROB_PLACEHOLDER))
+                    bboxes.append((x-r, y-r, x+r, y+r, PROB_PLACEHOLDER, CLASS_PLACEHOLDER))
                     
                     # Show detection window if debug enabled
                     if debug:
@@ -222,7 +223,7 @@ def templateMatch(frame, match_threshold = 400,
             if max_val > threshold:
                 matched[max_loc[1]-h//2:max_loc[1]+h//2+1, max_loc[0]-w//2:max_loc[0]+w//2+1] = 0   
                 points.append((int(max_loc[0]+(w+1)/2), int(max_loc[1] + (h+1)/2)))
-                bboxes.append((max_loc[0], max_loc[1], max_loc[0]+w+1, max_loc[1]+h+1, PROB_PLACEHOLDER))
+                bboxes.append((max_loc[0], max_loc[1], max_loc[0]+w+1, max_loc[1]+h+1, PROB_PLACEHOLDER, CLASS_PLACEHOLDER))
                 if debug:
                     cv2.rectangle(debug_frame,(max_loc[0],max_loc[1]), (max_loc[0]+w+1, max_loc[1]+h+1), (0,255,0) )
                     cv2.imshow("Detections",debug_frame)

@@ -49,7 +49,7 @@ if __name__ == "__main__":
             ret, bboxes, points = detector_func(frame)
 
             # Extract bounding box coordinates
-            detection_bboxes = np.asarray([b[:-1] for b in bboxes]).reshape((-1,4))
+            detection_bboxes = np.asarray([b[:-1] for b in bboxes]).reshape((-1,5))
             bb_temp = []
             for b in detection_bboxes:
                 x1 = b[0]
