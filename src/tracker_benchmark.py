@@ -132,20 +132,32 @@ t = np.arange(0, max([len(trk) for trk in trackers_list]))
 ax.plot(t, trackers_list[0], label="SORT")
 ax.plot(t, trackers_list[1], label="Centroid")
 ax.plot(t, trackers_list[2], label="Centroid_KF")
-ax.plot(t, trackers_list[3], label="IOU")
+ax.plot(t, trackers_list[3], label="IoU")
 ax.legend()
 
 # Graph the frame time for the different trackers
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set_ylabel("Frame Time (ms)")
+
+# Setting y limit to enalrge useful portion of chart
+ax.set_ylim([0, 0.15])
+
 ax.set_xlabel("Frame Number (-)")
 t = np.arange(0, max([len(trk) for trk in timers_list]))
 ax.plot(t, timers_list[0], label="SORT")
 ax.plot(t, timers_list[1], label="Centroid")
 ax.plot(t, timers_list[2], label="Centroid_KF")
-ax.plot(t, timers_list[3], label="IOU")
+ax.plot(t, timers_list[3], label="IoU")
 ax.legend()
+
+# Add annotation for 30FPS (realtime threshold)
+import matplotlib.transforms as transforms
+ax.axhline(y=0.0333, color='gray', linestyle='--')
+trans = transforms.blended_transform_factory(
+    ax.get_yticklabels()[0].get_transform(), ax.transData)
+ax.text(0,0.0333, "30FPS", color="gray", transform=trans, 
+        ha="right", va="center")
 
 # Show plots
 plt.show()
