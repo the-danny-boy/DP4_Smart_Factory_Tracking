@@ -32,10 +32,11 @@ detector_func = partial(houghDetect, dp = 1.5, minDist = 20,
 
 iou_thresh = 0.5
 
-# Dictionary to encode detections
+# List of dictionaries to encode detections
 #Image = image index, Bbox = bbox coordinates, Conf = confidence
 #TP/FP = binary flag indicating TP (1) or FP (0)
-detections = {"image":[], "bbox":[], "conf":[], "TP/FP":[]}
+#detections = {"image":[], "bbox":[], "conf":[], "TP/FP":[]}
+detections = []
 
 for index, (img_path, label_path) in enumerate(zip(images, labels)):
 
@@ -68,9 +69,9 @@ for index, (img_path, label_path) in enumerate(zip(images, labels)):
     
     for i, bbox in enumerate(bboxes):
         x1, y1, x2, y2, conf, class_id = bbox
-        detections["image"].append(index)
-        detections["bbox"].append((x1,y1,x2,y2))
-        detections["conf"].append(conf)
+        _image = index
+        _bbox = (x1,y1,x2,y2)
+        _conf = conf
 
         # Iterate through all gt_bboxes, calculating IoU to identify if TP/FP
         flag = True
@@ -78,16 +79,20 @@ for index, (img_path, label_path) in enumerate(zip(images, labels)):
             iou = bbox_iou(torch.FloatTensor(bbox[:4]), torch.FloatTensor(gt_bbox))
 
             if iou > iou_thresh:
-                detections["TP/FP"].append(1)
+                detections.append({"image":_image, "bbox":_bbox, "conf":_conf, "TP/FP":1})
                 flag = False
                 break
 
         if flag:
-            detections["TP/FP"].append(0)
-    
+            detections.append({"image":_image, "bbox":_bbox, "conf":_conf, "TP/FP":0})
+    break
 
 # Then sort the detections by decreasing confidence
+sorted_detections = sorted(detections, key=lambda x: x["conf"], reverse=True)
+
 # Find the accumulated TPs, FPs
+
+
 # Calculate the precision and recall
 
 # Find the 11-point interpolated AP (average precision)
