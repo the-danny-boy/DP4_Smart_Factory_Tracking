@@ -183,13 +183,62 @@ def hsvDetect(frame, hue_low = 0, hue_high = 179,
         return False, None, None
 
 
+# Non-Maximal Suppresion Implementation for duplicate bboxes
+# Malisiewicz et al.
+# Source: PyImageSearch - https://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/
+def non_max_suppression_fast(boxes, overlapThresh):
+	# if there are no boxes, return an empty list
+	if len(boxes) == 0:
+		return []
+	# if the bounding boxes integers, convert them to floats --
+	# this is important since we'll be doing a bunch of divisions
+	if boxes.dtype.kind == "i":
+		boxes = boxes.astype("float")
+	# initialize the list of picked indexes	
+	pick = []
+	# grab the coordinates of the bounding boxes
+	x1 = boxes[:,0]
+	y1 = boxes[:,1]
+	x2 = boxes[:,2]
+	y2 = boxes[:,3]
+	# compute the area of the bounding boxes and sort the bounding
+	# boxes by the bottom-right y-coordinate of the bounding box
+	area = (x2 - x1 + 1) * (y2 - y1 + 1)
+	idxs = np.argsort(y2)
+	# keep looping while some indexes still remain in the indexes
+	# list
+	while len(idxs) > 0:
+		# grab the last index in the indexes list and add the
+		# index value to the list of picked indexes
+		last = len(idxs) - 1
+		i = idxs[last]
+		pick.append(i)
+		# find the largest (x, y) coordinates for the start of
+		# the bounding box and the smallest (x, y) coordinates
+		# for the end of the bounding box
+		xx1 = np.maximum(x1[i], x1[idxs[:last]])
+		yy1 = np.maximum(y1[i], y1[idxs[:last]])
+		xx2 = np.minimum(x2[i], x2[idxs[:last]])
+		yy2 = np.minimum(y2[i], y2[idxs[:last]])
+		# compute the width and height of the bounding box
+		w = np.maximum(0, xx2 - xx1 + 1)
+		h = np.maximum(0, yy2 - yy1 + 1)
+		# compute the ratio of overlap
+		overlap = (w * h) / area[idxs[:last]]
+		# delete all indexes from the index list that have
+		idxs = np.delete(idxs, np.concatenate(([last],
+			np.where(overlap > overlapThresh)[0])))
+	# return only the bounding boxes that were picked using the
+	# integer data type
+	return boxes[pick].astype("int")
+
+
 # Template Match Detection
-def templateMatch(frame, match_threshold = 400,
+def templateMatch(frame, match_threshold = 40,
                         template_path_idx = 0, debug = False):
     try:
     
-        template_paths = ["Template.png", "Template_Averaged_half.png",
-                          "Template_Averaged_half_crop.png"] # Template_Averaged.png
+        template_paths = ["Template.png", "Template_Averaged_half_crop.png"]
 
         # Load template image
         template = cv2.imread(template_paths[template_path_idx])
@@ -206,26 +255,25 @@ def templateMatch(frame, match_threshold = 400,
         # Perform matching
         matched = cv2.matchTemplate(frame, template, method)
 
+        # Find matched locations
+        loc = np.where( matched >= threshold)
+        recs = []
+        for pt in zip(*loc[::-1]):
+            recs.append((pt[0], pt[1], pt[0]+w, pt[1]+h))
+        
+        # Perform non max suppresion on bboxes, with overlap threshold = 0.2
+        _bboxes = non_max_suppression_fast(np.asarray(recs), 0.2)
+        
         debug_frame = frame.copy()
-
         points = []
         bboxes = []
 
-        max_val = 1
-
-        # While matched points exist that are above the threshold
-        while max_val > threshold:
-
-            # Detect min and max value locations in matched array
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched)
-
-            # If value above threshold, annotate frame and append centroid to point list
-            if max_val > threshold:
-                matched[max_loc[1]-h//2:max_loc[1]+h//2+1, max_loc[0]-w//2:max_loc[0]+w//2+1] = 0   
-                points.append((int(max_loc[0]+(w+1)/2), int(max_loc[1] + (h+1)/2)))
-                bboxes.append((max_loc[0], max_loc[1], max_loc[0]+w+1, max_loc[1]+h+1, PROB_PLACEHOLDER, CLASS_PLACEHOLDER))
-                if debug:
-                    cv2.rectangle(debug_frame,(max_loc[0],max_loc[1]), (max_loc[0]+w+1, max_loc[1]+h+1), (0,255,0) )
+        # Annotate frame and append centroids and bboxes to relevant lists
+        for _bbox in _bboxes:
+            bboxes.append((_bbox[0],_bbox[1],_bbox[2],_bbox[3], PROB_PLACEHOLDER, CLASS_PLACEHOLDER))
+            points.append((int(_bbox[0] + (_bbox[2]-_bbox[0])/2), int(_bbox[1] + (_bbox[3]-_bbox[1])/2)))
+            if debug:
+                    cv2.rectangle(debug_frame, (_bbox[0],_bbox[1]), (_bbox[2],_bbox[3]), (0,255,0), 2)
                     cv2.imshow("Detections",debug_frame)
 
         return True, bboxes, points

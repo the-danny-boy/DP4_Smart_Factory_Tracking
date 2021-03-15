@@ -40,9 +40,7 @@ def trackbarSetup(window_name, detector_type):
 
     elif detector_type == "template":
         parameters = {"threshold":[80,100], #Note: scaled by 100
-                      "template_img [static, average, average_crop]": [0,2]} 
-                      #40 for 0, 50 for 1, 70 for 2
-        pass
+                      "template_img [static, average_crop]": [0,1]} 
 
     for p, v in zip(parameters.keys(), parameters.values()):
         cv2.createTrackbar(p, window_name, v[0], v[1], nothing)
