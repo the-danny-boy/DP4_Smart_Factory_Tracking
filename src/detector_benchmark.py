@@ -128,5 +128,18 @@ plt.ylabel("Precision")
 plt.show()
 """
 
-# Find the 11-point interpolated AP (average precision)
-# = 1/11(SUM(precision@recall_[0.0,0.1,0.2,...,0.8,0.9,1.0]))
+# Find the Average Precision (AP)
+# Integrated AP
+ap = np.trapz([d["Precision"] for d in sorted_detections], \
+    [d["Recall"] for d in sorted_detections])
+print("Integrated AP:", ap)
+
+"""
+# 11-pt Interpolated AP
+import math
+precisions = np.asarray([d["Precision"] for d in sorted_detections])
+recalls = np.asarray([d["Recall"] for d in sorted_detections])
+ap_interpolate = 1/11 * sum([max(precisions[recalls>n/10]) \
+                 for n in range(0,math.ceil(max(recalls)*10))])
+print("Interpolated AP:", ap_interpolate)
+"""
