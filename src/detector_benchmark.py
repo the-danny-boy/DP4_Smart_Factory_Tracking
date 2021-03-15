@@ -4,15 +4,18 @@ This script is used to benchmark detector performance.
 """
 
 import cv2
-import numpy
+import numpy as np
+import torch
+import sys
+sys.path.append('ScaledYOLOv4/')
+from ScaledYOLOv4.utils.general import bbox_iou
+import glob
+from copy import deepcopy
+from chrono import Timer
 
 from detection import houghDetect
 from functools import partial
 
-from chrono import Timer
-
-import glob
-from copy import deepcopy
 
 # Paths for test images and labels
 image_paths = r"ScaledYOLOv4/vials/test/images/"
@@ -27,6 +30,7 @@ detector_func = partial(houghDetect, dp = 1.5, minDist = 20,
                         param1 = 27, param2 = 19, 
                         minRadius = 12, maxRadius = 15, debug = False)
 
+iou_thresh = 0.5
 
 # Dictionary to encode detections
 #Image = image index, Bbox = bbox coordinates, Conf = confidence
@@ -60,19 +64,31 @@ for index, (img_path, label_path) in enumerate(zip(images, labels)):
     with Timer() as timed:
         ret, bboxes, points = detector_func(img)
     detection_time = timed.elapsed
-    print("Time elapsed is:", detection_time)
+    #print("Time elapsed is:", detection_time)
     
-    for bbox in bboxes:
+    for i, bbox in enumerate(bboxes):
         x1, y1, x2, y2, conf, class_id = bbox
         detections["image"].append(index)
         detections["bbox"].append((x1,y1,x2,y2))
         detections["conf"].append(conf)
 
         # Iterate through all gt_bboxes, calculating IoU to identify if TP/FP
+        flag = True
+        for ip, gt_bbox in enumerate(gt_bboxes):
+            iou = bbox_iou(torch.FloatTensor(bbox[:4]), torch.FloatTensor(gt_bbox))
 
-    # Then sort the detections by decreasing confidence
-    # Find the accumulated TPs, FPs
-    # Calculate the precision and recall
+            if iou > iou_thresh:
+                detections["TP/FP"].append(1)
+                flag = False
+                break
 
-    # Find the 11-point interpolated AP (average precision)
-    # = 1/11(SUM(precision@recall_[0.0,0.1,0.2,...,0.8,0.9,1.0]))
+        if flag:
+            detections["TP/FP"].append(0)
+    
+
+# Then sort the detections by decreasing confidence
+# Find the accumulated TPs, FPs
+# Calculate the precision and recall
+
+# Find the 11-point interpolated AP (average precision)
+# = 1/11(SUM(precision@recall_[0.0,0.1,0.2,...,0.8,0.9,1.0]))
