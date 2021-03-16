@@ -1205,7 +1205,7 @@ MonoBehaviour:
   spawnExtents: {x: 10, y: 10}
   rejectionNumber: 50
   radius: 1
-  spawnLimit: 20
+  spawnLimit: 50
   initial_spawn: 0
   spawn_period: 2
   write_output: 0
