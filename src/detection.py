@@ -238,7 +238,7 @@ def templateMatch(frame, match_threshold = 40,
                         template_path_idx = 0, debug = False):
     try:
     
-        template_paths = ["Template.png", "Template_Averaged_half_crop.png"]
+        template_paths = ["Template_New_half.png", "Template_Averaged_half_crop.png"]
 
         # Load template image
         template = cv2.imread(template_paths[template_path_idx])
@@ -261,8 +261,9 @@ def templateMatch(frame, match_threshold = 40,
         for pt in zip(*loc[::-1]):
             recs.append((pt[0], pt[1], pt[0]+w, pt[1]+h))
         
-        # Perform non max suppresion on bboxes, with overlap threshold = 0.2
-        _bboxes = non_max_suppression_fast(np.asarray(recs), 0.2)
+        # Perform non max suppresion on bboxes, with overlap threshold
+        #_bboxes = non_max_suppression_fast(np.asarray(recs), 0.2)
+        _bboxes = non_max_suppression_fast(np.asarray(recs), 0.5)
         
         debug_frame = frame.copy()
         points = []

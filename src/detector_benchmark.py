@@ -29,7 +29,7 @@ hough = partial(houghDetect, dp = 1.5, minDist = 20,
                         param1 = 27, param2 = 19, 
                         minRadius = 12, maxRadius = 15, debug = False)
 
-template0 = partial(templateMatch, match_threshold = 22, template_path_idx = 0)
+template0 = partial(templateMatch, match_threshold = 30, template_path_idx = 0)
 template1 = partial(templateMatch, match_threshold = 60, template_path_idx = 1)
 
 # Initialise lists for detectors, AP scores, and detection times
@@ -56,7 +56,7 @@ for detector_func in detector_funcs:
 
     # Iterate through all images and labels for detections
     for index, (img_path, label_path) in enumerate(zip(images, labels)):
-        print(index)
+        # print(index)
         # Read image and resize to 50%
         img = cv2.imread(img_path)
         img = cv2.resize(img, (int(img.shape[1] * 0.5), int(img.shape[0] * 0.5)))
@@ -143,5 +143,6 @@ for detector_func in detector_funcs:
     detector_aps.append(ap)
 
 # Print out metrics
+print("Detectors: Hough, Template (Raw), Template (Averaged)")
 print("Detection Time(s):", detection_times)
 print("Detection AP(s):", detector_aps)

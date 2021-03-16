@@ -65,7 +65,7 @@ for idx, _tracker in enumerate(trackers.values()):
         while True:
 
             # Provide timing functionality for tracker loop
-            with Timer() as timed:
+            with Timer() as full_timed:
 
                 # Fetch next available frame from generator
                 ret, frame = next(vs.read())
@@ -91,7 +91,11 @@ for idx, _tracker in enumerate(trackers.values()):
                 detection_bboxes = np.asarray(bb_temp, dtype="int")
                 detection_confidences = np.ones(len(bboxes)).reshape((-1,))
                 detection_class_ids = np.ones(len(bboxes)).reshape((-1,))
-                output_tracks = tracker[attempt_no].update(detection_bboxes, detection_confidences, detection_class_ids)
+
+                # Time tracker update
+                with Timer() as tracker_timed:
+                    output_tracks = tracker[attempt_no].update(detection_bboxes, detection_confidences, detection_class_ids)
+
                 frame = draw_tracks(frame.copy(), output_tracks)
                 
                 # Display frame contents
@@ -111,12 +115,12 @@ for idx, _tracker in enumerate(trackers.values()):
 
             # Append attempt data to list
             _trackers_list[attempt_no].append(int(final_id))
-            _timers_list[attempt_no].append(timed.elapsed)
-
+            _timers_list[attempt_no].append(tracker_timed.elapsed)
+            
             # Temporarily exit from video stream early
             if frame_no == 200:
                 break
-
+            
             frame_no += 1
 
     # Assign mean values to lists
