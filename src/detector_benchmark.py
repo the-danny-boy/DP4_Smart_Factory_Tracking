@@ -14,6 +14,7 @@ from copy import deepcopy
 from chrono import Timer
 
 from detection import houghDetect, templateMatch, hsvDetect
+from YOLO_detector_wrapper import setup, detect_wrapper
 from functools import partial
 
 # Paths for test images and labels
@@ -35,9 +36,11 @@ hsv = partial(hsvDetect, hue_low = 0, hue_high = 179,
 
 template0 = partial(templateMatch, match_threshold = 30, template_path_idx = 0)
 template1 = partial(templateMatch, match_threshold = 60, template_path_idx = 1)
+model = setup()
+yolo = partial(detect_wrapper, model=model, debug=False)
 
 # Initialise lists for detectors, AP scores, and detection times
-detector_funcs = [hough, hsv, template0, template1]
+detector_funcs = [hough, hsv, template0, template1, yolo]
 detector_aps = []
 detection_times = []
 

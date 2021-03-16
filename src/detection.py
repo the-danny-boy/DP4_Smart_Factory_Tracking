@@ -261,7 +261,7 @@ def templateMatch(frame, match_threshold = 40,
         
         # Perform non max suppresion on bboxes, with overlap threshold
         #_bboxes = non_max_suppression_fast(np.asarray(recs), 0.2)
-        _bboxes = non_max_suppression_fast(np.asarray(recs), 0.5)
+        _bboxes = non_max_suppression_fast(np.asarray(recs), 0.4)
         
         debug_frame = frame.copy()
         points = []
