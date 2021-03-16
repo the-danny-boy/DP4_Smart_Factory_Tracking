@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 from acquisition import VideoStream
 from utility_functions import crosshair
-from detection import baseCorrection, houghDetect
+from YOLO_detector_wrapper import setup, detect_wrapper
 
 from functools import partial
 from itertools import combinations
@@ -33,9 +33,8 @@ vs = VideoStream(src = "../Data_Generator/Assets/Outputs/2021-02-21_23h37m_Camer
                     fps = 30, height = int(1080*SCALE_FACTOR), width = int(1920*SCALE_FACTOR))
 
 # Define detector
-detector_func = partial(houghDetect, dp = 1.5, minDist = 18, 
-                                    param1 = 12, param2 = 12, 
-                                    minRadius = 13, maxRadius = 17, debug = False)
+model = setup()
+detector_func = partial(detect_wrapper, model=model, debug=False)
 
 # Start the video stream object
 vs.start()
@@ -145,7 +144,7 @@ ax = fig.add_subplot(111)
 ax.set_ylabel("Frame Time (ms)")
 
 # Setting y limit to enalrge useful portion of chart
-ax.set_ylim([0, 0.15])
+#ax.set_ylim([0, 0.15])
 
 ax.set_xlabel("Frame Number (-)")
 t = np.arange(0, max([len(trk) for trk in timers_list]))
