@@ -19,6 +19,8 @@ public class Spawner : MonoBehaviour
     [SerializeField] private float initial_spawn = 0.0f;
     [SerializeField] private float spawn_period = 1.0f;
 
+    [SerializeField] private bool write_output = true;
+
     private List<GameObject> spawnedGameObjects = new List<GameObject>();
     private float inclinationAngle = 20f;
     private float displayHeight = 9f;
@@ -114,13 +116,16 @@ public class Spawner : MonoBehaviour
     void OnApplicationQuit()
     {
 
-        string writeText = "";
-        foreach(int data in collisionData)
+        if (write_output)
         {
-            writeText += Convert.ToString(data) + "\n";
-        }
+            string writeText = "";
+            foreach(int data in collisionData)
+            {
+                writeText += Convert.ToString(data) + "\n";
+            }
 
-        File.AppendAllText(collisionFile, writeText);
+            File.AppendAllText(collisionFile, writeText);
+        }
 
     }
 
