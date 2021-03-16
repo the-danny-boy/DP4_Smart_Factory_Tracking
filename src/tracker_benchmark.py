@@ -3,22 +3,25 @@
 This script is used to benchmark tracker performance.
 """
 
-import math
+from functools import partial
+from chrono import Timer
+from copy import deepcopy
 
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+import matplotlib.transforms as transforms
 
 from acquisition import VideoStream
 from utility_functions import crosshair
 from YOLO_detector_wrapper import setup, detect_wrapper
 
-from functools import partial
-from itertools import combinations
-from chrono import Timer
-
 from motrackers import CentroidTracker, IOUTracker, CentroidKF_Tracker, SORT
 from motrackers.utils import draw_tracks
+
+# Benchmark settings
+early_terminate = 200
+repeat_attempts = 3
 
 # Define each of the trackers
 trackers = {}
@@ -40,21 +43,28 @@ detector_func = partial(detect_wrapper, model=model, debug=False)
 vs.start()
 
 # Create empty lists for storing the data per tracker
-trackers_list = [[],[],[],[]]
-timers_list = [[],[],[],[]]
+trackers_list = []
+timers_list = []
 
-from copy import deepcopy
+for i in range(len(trackers)):
+    trackers_list.append([])
+    timers_list.append([])
+
+
 # Repeat per tracker (and restart video stream)
 for idx, _tracker in enumerate(trackers.values()):
 
-    # Create empty lists to store each attempt (for averaging)
-    _trackers_list = [[],[],[]]
-    _timers_list = [[],[],[]]
-
+    # Create empty lists to store each attempt (for averaging) and
     # Create deep copies of the tracker to be used (so restart from 0)
-    tracker = [deepcopy(_tracker), deepcopy(_tracker), deepcopy(_tracker)]
+    _trackers_list = []
+    _timers_list = []
+    tracker = []
+    for i in range(repeat_attempts):
+        _trackers_list.append([])
+        _timers_list.append([])
+        tracker.append(deepcopy(_tracker))
 
-    for attempt_no in range(3):
+    for attempt_no in range(repeat_attempts):
 
         # Restart video stream properties each attempt
         vs.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -116,51 +126,55 @@ for idx, _tracker in enumerate(trackers.values()):
             _trackers_list[attempt_no].append(int(final_id))
             _timers_list[attempt_no].append(tracker_timed.elapsed)
             
-            # Temporarily exit from video stream early
-            if frame_no == 200:
-                break
+            # Break from loop early - for testing
+            if bool(early_terminate):
+                if frame_no > early_terminate:
+                    break
             
             frame_no += 1
 
     # Assign mean values to lists
     trackers_list[idx] = np.mean(np.asarray(_trackers_list), axis=0).tolist()
-    timers_list[idx] = np.mean(np.asarray(_timers_list), axis=0).tolist()
+    timers_list[idx] = np.mean(np.asarray(_timers_list) * 1000, axis=0).tolist()
 
 # Graph the tracker count for the different trackers
+labels = ["SORT", "Centroid", "Centroid_KF", "IoU"]
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set_ylabel("Tracker Count")
 ax.set_xlabel("Frame Number (-)")
 t = np.arange(0, max([len(trk) for trk in trackers_list]))
-ax.plot(t, trackers_list[0], label="SORT")
-ax.plot(t, trackers_list[1], label="Centroid")
-ax.plot(t, trackers_list[2], label="Centroid_KF")
-ax.plot(t, trackers_list[3], label="IoU")
+
+for i in range(len(labels)):
+    ax.plot(t, trackers_list[i], label=labels[i])
 ax.legend()
+plt.tight_layout()
 
 # Graph the frame time for the different trackers
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set_ylabel("Frame Time (ms)")
+ax.set_xlabel("Frame Number (-)")
+t = np.arange(0, max([len(trk) for trk in timers_list]))
 
 # Setting y limit to enalrge useful portion of chart
 #ax.set_ylim([0, 0.15])
 
-ax.set_xlabel("Frame Number (-)")
-t = np.arange(0, max([len(trk) for trk in timers_list]))
-ax.plot(t, timers_list[0], label="SORT")
-ax.plot(t, timers_list[1], label="Centroid")
-ax.plot(t, timers_list[2], label="Centroid_KF")
-ax.plot(t, timers_list[3], label="IoU")
+for i in range(len(labels)):
+    ax.plot(t, timers_list[i], label=labels[i])
 ax.legend()
 
-# Add annotation for 30FPS (realtime threshold)
+# Show the 30FPS line (realtime threshold)
 import matplotlib.transforms as transforms
-ax.axhline(y=0.0333, color='gray', linestyle='--')
-trans = transforms.blended_transform_factory(
-    ax.get_yticklabels()[0].get_transform(), ax.transData)
-ax.text(0,0.0333, "30FPS", color="gray", transform=trans, 
-        ha="right", va="center")
+ax.axhline(y=33.3, color='black', linestyle='--')
+ax.annotate(text="30FPS", xy =(ax.get_xlim()[1], 33.3 - 
+            ax.get_ylim()[1] * 0.01), xycoords="data", color="black")
+
+# Enforce integer ticks on x-axis for discrete / integer frame numbers
+import matplotlib.ticker as ticker
+ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+plt.tight_layout()
 
 # Show plots
 plt.show()

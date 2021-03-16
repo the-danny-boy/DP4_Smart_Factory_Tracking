@@ -189,13 +189,14 @@ for i in range(len(grouped_times)):
     ax.plot(grouped_times[i], grouped_accs[i], label=detector_labels[i])
 
 # Plot the 30FPS line
-ax.axvline(x=33.3, color='gray', linestyle='--')
-x_bounds = ax.get_xlim()
-ax.annotate(text="30FPS", xy =(((33.3 - 0.5 -x_bounds[0])/(x_bounds[1]-x_bounds[0])), 0.03), \
-    xycoords='axes fraction', color="gray", verticalalignment='baseline', horizontalalignment='right' , rotation = 0)
+import matplotlib.transforms as transforms
+ax.axvline(x=33.3, color='black', linestyle='--')
+ax.annotate(text="30FPS", xy =(33.3 - ax.get_xlim()[1] * 0.1, 0.02), \
+            xycoords="data", color="black")
 
 # Set axes and legend, then show
 ax.set_xlabel("Detection Speed (ms/image)")
 ax.set_ylabel("Test AP")
 ax.legend()
+plt.tight_layout()
 plt.show()
