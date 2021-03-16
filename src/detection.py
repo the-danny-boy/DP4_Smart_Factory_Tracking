@@ -69,7 +69,7 @@ def connectedFiltering(frame, mask, debug = False):
         (centroid_x, centroid_y) = centroids[i]
 
         # Perform selection of connection components based on area
-        if area > 0 and area < 1500:
+        if area > 10 and area < 1500:
 
             # Add bounding box to list
             bboxes.append((x, y, x + w, y + h, PROB_PLACEHOLDER, CLASS_PLACEHOLDER))
@@ -148,11 +148,6 @@ def houghDetect(frame, dp = 1.5, minDist = 20,
         return False, None, None
 
 
-# Grayscale Detection Function
-def grayscaleDetect(frame):
-    pass
-
-
 # HSV Detection Function
 def hsvDetect(frame, hue_low = 0, hue_high = 179, 
                      sat_low = 0, sat_high = 255, 
@@ -174,6 +169,9 @@ def hsvDetect(frame, hue_low = 0, hue_high = 179,
 
         # Segment the frame using the binary mask
         hsv_seg = cv2.bitwise_and(frame, frame, mask = mask)
+        
+        if debug:
+            cv2.imshow("HSV_mask", hsv_seg)
 
         bboxes, points = connectedFiltering(frame, mask, debug)
 
@@ -281,12 +279,6 @@ def templateMatch(frame, match_threshold = 40,
     
     except:
         return False, None, None
-
-
-# Perform a sweep to benchmark detectors
-def benchmark_detector(frame, detector):
-    ret, detections = detector()
-    pass
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ import glob
 from copy import deepcopy
 from chrono import Timer
 
-from detection import houghDetect, templateMatch
+from detection import houghDetect, templateMatch, hsvDetect
 from functools import partial
 
 # Paths for test images and labels
@@ -29,11 +29,15 @@ hough = partial(houghDetect, dp = 1.5, minDist = 20,
                         param1 = 27, param2 = 19, 
                         minRadius = 12, maxRadius = 15, debug = False)
 
+hsv = partial(hsvDetect, hue_low = 0, hue_high = 179, 
+                     sat_low = 0, sat_high = 94, 
+                     val_low = 56, val_high = 255, debug = False)
+
 template0 = partial(templateMatch, match_threshold = 30, template_path_idx = 0)
 template1 = partial(templateMatch, match_threshold = 60, template_path_idx = 1)
 
 # Initialise lists for detectors, AP scores, and detection times
-detector_funcs = [hough, template0, template1]
+detector_funcs = [hough, hsv, template0, template1]
 detector_aps = []
 detection_times = []
 
@@ -143,6 +147,6 @@ for detector_func in detector_funcs:
     detector_aps.append(ap)
 
 # Print out metrics
-print("Detectors: Hough, Template (Raw), Template (Averaged)")
+print("Detectors: Hough, HSV, Template (Raw), Template (Averaged)")
 print("Detection Time(s):", detection_times)
 print("Detection AP(s):", detector_aps)

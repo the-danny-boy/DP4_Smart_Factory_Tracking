@@ -33,9 +33,9 @@ vs = VideoStream(src = "../Data_Generator/Assets/Outputs/2021-02-21_23h37m_Camer
                     fps = 30, height = int(1080*SCALE_FACTOR), width = int(1920*SCALE_FACTOR))
 
 # Define detector
-detector_func = partial(houghDetect, dp = 1.5, minDist = 20, 
-                                    param1 = 27, param2 = 19, 
-                                    minRadius = 12, maxRadius = 15, debug = False)
+detector_func = partial(houghDetect, dp = 1.5, minDist = 18, 
+                                    param1 = 12, param2 = 12, 
+                                    minRadius = 13, maxRadius = 17, debug = False)
 
 # Start the video stream object
 vs.start()
