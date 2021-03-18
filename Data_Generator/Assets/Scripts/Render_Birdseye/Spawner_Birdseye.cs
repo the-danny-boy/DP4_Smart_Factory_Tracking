@@ -3,7 +3,9 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
+
 using UnityEngine;
+using UnityEditor;
 using Random = UnityEngine.Random;
 
 public class Spawner_Birdseye : MonoBehaviour
@@ -29,6 +31,11 @@ public class Spawner_Birdseye : MonoBehaviour
     [SerializeField] private int rowLimit = 20;
 
 
+    [SerializeField] private bool automatedGeneration = true;
+    [SerializeField] private int[] counts = {5, 50, 500};
+    [SerializeField] private int[] fileNum = {500, 300, 200};
+    [SerializeField] private float dataSplit = 0.8f;
+
     private List<GameObject> spawnedGameObjects = new List<GameObject>();
 
     public GameObject cameraGameObject;
@@ -36,6 +43,7 @@ public class Spawner_Birdseye : MonoBehaviour
 
     Object_Pooler objectPooler;
 
+    int runCounter = 0;
     int fileCounter = 0;
     List<float[]> position_data;
 
@@ -48,6 +56,28 @@ public class Spawner_Birdseye : MonoBehaviour
         Physics.gravity = new Vector3(0f,0f,0f);
         Random.InitState(randomSeed);
         position_data = new List<float[]>();
+
+        // Create required folders for outputs
+        if (!System.IO.Directory.Exists("Data_Generator_Outputs/"))
+        {
+            Directory.CreateDirectory("Data_Generator_Outputs/");
+        }
+
+        foreach(var item in counts)
+        {
+            if (!System.IO.Directory.Exists("Data_Generator_Outputs/" + item + "/"))
+            {
+                Directory.CreateDirectory("Data_Generator_Outputs/" + item + "/");
+
+                Directory.CreateDirectory("Data_Generator_Outputs/" + item + "/train/");
+                Directory.CreateDirectory("Data_Generator_Outputs/" + item + "/train/images/");
+                Directory.CreateDirectory("Data_Generator_Outputs/" + item + "/train/labels/");
+
+                Directory.CreateDirectory("Data_Generator_Outputs/" + item + "/test/");
+                Directory.CreateDirectory("Data_Generator_Outputs/" + item + "/test/images/");
+                Directory.CreateDirectory("Data_Generator_Outputs/" + item + "/test/labels/");
+            }
+        }
     }
 
 
@@ -63,6 +93,11 @@ public class Spawner_Birdseye : MonoBehaviour
     // Used to update the vial positions
     void Update()
     {
+
+        if (automatedGeneration)
+        {
+            spawnLimit = counts[runCounter];
+        }
 
         List<Vector2> points = new List<Vector2>();
 
@@ -156,12 +191,34 @@ public class Spawner_Birdseye : MonoBehaviour
                 writeText += dataString + "\n";   
             }
 
-            // Write to file
-            File.WriteAllText("Data_Generator_Outputs/" + fileCounter + ".txt", writeText);
+            // Write to file (to train and test with specified split)
+            if (fileCounter <= dataSplit * fileNum[runCounter])
+                File.WriteAllText("Data_Generator_Outputs/" + counts[runCounter] + "/train/labels/" + fileCounter + ".txt", writeText);
+            else
+                File.WriteAllText("Data_Generator_Outputs/" + counts[runCounter] + "/test/labels/" + fileCounter + ".txt", writeText);
 
             // Save out accompanying image
             saveCameraView();
         }
+
+        // Check if written out N=fileNum files
+        if (automatedGeneration && fileCounter > fileNum[runCounter])
+        {
+            // Check if finished scheduled runs
+            if(runCounter == counts.Length-1)
+            {
+                // Conditional compilation to quit application / playmode upon completion
+                #if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;
+                #else
+                    Application.Quit();
+                #endif
+            }
+
+            fileCounter = 0;
+            runCounter++;
+        }
+
     }
 
 
@@ -189,8 +246,12 @@ public class Spawner_Birdseye : MonoBehaviour
         var Bytes = Image.EncodeToJPG();
         Destroy(Image);
  
-        // Write to file and increment file counter
-        File.WriteAllBytes("Data_Generator_Outputs/" + fileCounter + ".jpg", Bytes);
+        // Write to file (to train and test with specified split)
+        if (fileCounter <= dataSplit * fileNum[runCounter])
+            File.WriteAllBytes("Data_Generator_Outputs/" + counts[runCounter] + "/train/images/" + fileCounter + ".jpg", Bytes);
+        else
+            File.WriteAllBytes("Data_Generator_Outputs/" + counts[runCounter] + "/test/images/" + fileCounter + ".jpg", Bytes);
+
         fileCounter++;
     }
 
