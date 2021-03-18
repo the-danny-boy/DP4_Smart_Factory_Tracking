@@ -19,17 +19,34 @@ from functools import partial
 
 import os
 
-image_root_directory = r"ScaledYOLOv4/vials/test/images/"
-image_count_variants = [x[0] for x in os.walk(image_root_directory)][1:]
+output_root_directory = r"../Data_Generator/Data_Generator_Outputs/"
 
-label_root_directory = r"ScaledYOLOv4/vials/test/labels/"
-label_count_variants = [x[0] for x in os.walk(label_root_directory)][1:]
+image_count_variants = [os.path.join(output_root_directory, dir_item, "test", "images")+"/" for dir_item in os.listdir(output_root_directory)]
+label_count_variants = [os.path.join(output_root_directory, dir_item, "test", "labels")+"/" for dir_item in os.listdir(output_root_directory)]
 
+# Define detector(s)
+hough = partial(houghDetect, dp = 1.5, minDist = 20, 
+                        param1 = 27, param2 = 19, 
+                        minRadius = 12, maxRadius = 15, debug = False)
+
+hsv = partial(hsvDetect, hue_low = 0, hue_high = 179, 
+                    sat_low = 0, sat_high = 94, 
+                    val_low = 56, val_high = 255, debug = False)
+
+template0 = partial(templateMatch, match_threshold = 30, template_path_idx = 0)
+template1 = partial(templateMatch, match_threshold = 60, template_path_idx = 1)
+model = setup()
+yolo = partial(detect_wrapper, model=model, debug=False)
+
+
+# Initialise list for detectors
+detector_funcs = [hough, hsv, template0, template1, yolo]
 
 comparison_times = []
 comparison_accs = []
 for image_paths, label_paths in zip(image_count_variants, label_count_variants):
-    
+    print(image_paths)
+
     # Paths for test images and labels
     image_paths = image_paths+"/"
     label_paths = label_paths+"/"
@@ -38,22 +55,7 @@ for image_paths, label_paths in zip(image_count_variants, label_count_variants):
     images = sorted(glob.glob(image_paths + "*.jpg"))
     labels = sorted(glob.glob(label_paths + "*.txt"))
 
-    # Define detector(s)
-    hough = partial(houghDetect, dp = 1.5, minDist = 20, 
-                            param1 = 27, param2 = 19, 
-                            minRadius = 12, maxRadius = 15, debug = False)
-
-    hsv = partial(hsvDetect, hue_low = 0, hue_high = 179, 
-                        sat_low = 0, sat_high = 94, 
-                        val_low = 56, val_high = 255, debug = False)
-
-    template0 = partial(templateMatch, match_threshold = 30, template_path_idx = 0)
-    template1 = partial(templateMatch, match_threshold = 60, template_path_idx = 1)
-    model = setup()
-    yolo = partial(detect_wrapper, model=model, debug=False)
-
-    # Initialise lists for detectors, AP scores, and detection times
-    detector_funcs = [hough, hsv, template0, template1, yolo]
+    # Initialise lists for AP scores, and detection times
     detector_aps = []
     detection_times = []
 
@@ -186,6 +188,9 @@ ax = fig.add_subplot(111)
 # Plot the performance data
 detector_labels = ["Hough", "HSV", "Template (Raw)", "Template (Averaged)", "Scaled-YOLOv4"]
 for i in range(len(grouped_times)):
+    # Reorder the metrics to satisfy increasing detector counts (hard coded, but could do programatically)
+    grouped_times[i] = [grouped_times[i][2], grouped_times[i][0], grouped_times[i][1]]
+    grouped_accs[i] = [grouped_accs[i][2], grouped_accs[i][0], grouped_accs[i][1]]
     ax.plot(grouped_times[i], grouped_accs[i], label=detector_labels[i])
 
 # Plot the 30FPS line

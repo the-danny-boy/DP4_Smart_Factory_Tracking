@@ -63,7 +63,7 @@ def detect(frame, model):
 
     # Process detections (and resize to frame)
     for i, det in enumerate(pred):
-        gn = torch.tensor(frame.shape)[[1, 0, 1, 0]]
+        #gn = torch.tensor(frame.shape)[[1, 0, 1, 0]]
         if det is not None and len(det):
             det[:, :4] = scale_coords(img.shape[2:], det[:, :4], frame.shape).round()
 
@@ -83,7 +83,7 @@ def detect_wrapper(frame, model=None, debug=False):
         for d in detections:
             if d is not None:
                 for b in d:
-                    x1, y1, x2, y2, conf, class_no = b.cpu()
+                    x1, y1, x2, y2, conf, class_no = b.cpu().numpy()
                     centroid = tuple([int(x1 + (x2 - x1) / 2), int(y1 + (y2 - y1) / 2)])
                     bboxes.append((x1, y1, x2, y2, conf, class_no))
                     points.append(centroid)
