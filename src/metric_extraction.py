@@ -15,6 +15,9 @@ from utility_functions import crosshair
 from YOLO_detector_wrapper import setup, detect_wrapper
 from centroid_tracker import Centroid_Tracker
 
+from utility_functions import crosshair, heron, regularity
+from itertools import combinations
+
 # Benchmark settings
 early_terminate = 200
 repeat_attempts = 3
@@ -53,7 +56,8 @@ while True:
 
     # Iterate through tracked objects and annotate
     for idx, object in zip(trackedObjects.keys(), trackedObjects.values()):
-        crosshair(frame, object["positions"][-1], size = 8, color = (0,0,255))
+        #crosshair(frame, object["positions"][-1], size = 8, color = (0,0,255))
+        pass
 
 
         """ Insert metrics code here ================================ """
@@ -63,6 +67,43 @@ while True:
         """ ========================================================= """
 
 
+    with Timer() as void_timed:
+        # VOIDS (SPATIAL DESCRIPTOR)
+        # Create a subdiv using the frame geometry
+        rect = (0,0,frame.shape[1],frame.shape[0])
+        subdiv = cv2.Subdiv2D(rect)
+
+        # Insert detected points into the subdiv, and fetch triangulation
+        for p in points:
+            subdiv.insert(p)
+        ts = subdiv.getTriangleList()
+
+        # Reshape the triangle list into matrix of point triples
+        pts_shaped = np.asarray(ts).reshape(-1,3,2)
+        for pts in pts_shaped:
+
+            # Find the triangle area
+            ar = heron(pts[0], pts[1], pts[2])
+
+            # Find the triangle regularity
+            reg = regularity(pts[0], pts[1], pts[2])
+
+            # Explicit void metric is combination of regularity and size
+            # => Check if too large or skewed (likely indicator of bad void)
+            if (reg > 0.1 and ar > 500) or ar > 800:
+
+                _frame = frame.copy()
+                
+                # Iterate through all pairs and draw lines
+                """for pt1, pt2 in combinations(pts, 2):
+                    cv2.line(_frame, tuple(pt1), tuple(pt2), (0,0,255), 4)"""
+
+                # Draw a filled polygon to highlight the void
+                pts = np.asarray(pts, dtype=np.int32)               
+
+                cv2.fillPoly(_frame, [pts], (0,0,255))
+                frame = cv2.addWeighted(frame, 0.5, _frame, 0.5, 0)
+    print("Void process time (ms):", void_timed.elapsed)
 
     # Show annotated frame
     cv2.imshow("Frame", frame)
