@@ -48,6 +48,9 @@ public class Spawner_Birdseye : MonoBehaviour
     List<float[]> position_data;
 
 
+    List<Vector2> points;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -99,7 +102,8 @@ public class Spawner_Birdseye : MonoBehaviour
             spawnLimit = counts[runCounter];
         }
 
-        List<Vector2> points = new List<Vector2>();
+        //List<Vector2> points = new List<Vector2>();
+        //points.Clear();
 
         if(tessellate)
         {
@@ -252,6 +256,8 @@ public class Spawner_Birdseye : MonoBehaviour
         else
             File.WriteAllBytes("Data_Generator_Outputs/" + counts[runCounter] + "/test/images/" + fileCounter + ".jpg", Bytes);
 
+        rt.Release();
+        mRt.Release();
         fileCounter++;
     }
 
