@@ -32,8 +32,13 @@ trackers["iou"] = IOUTracker(max_lost=3, min_detection_confidence=0.4, iou_thres
 
 # Define video stream
 SCALE_FACTOR = 0.5
-vs = VideoStream(src = "../Data_Generator/Assets/Outputs/2021-02-21_23h37m_Camera1_005.webm", 
+vs = VideoStream(src = "../Data_Generator/Assets/Outputs/2021-03-18_20h40m_Camera1_011.webm", 
                     fps = 30, height = int(1080*SCALE_FACTOR), width = int(1920*SCALE_FACTOR))
+
+# Acquire ground truth object instance count
+with open("../Data_Generator/Assets/Outputs/2021.03.18_2040_instanceData.txt") as f:
+    gt_instance_count = f.readlines()
+    gt_instance_count = [int(item.rstrip()) for item in gt_instance_count]
 
 # Define detector
 model = setup()
@@ -45,10 +50,12 @@ vs.start()
 # Create empty lists for storing the data per tracker
 trackers_list = []
 timers_list = []
+object_count = []
 
 for i in range(len(trackers)):
     trackers_list.append([])
     timers_list.append([])
+    object_count.append([])
 
 
 # Repeat per tracker (and restart video stream)
@@ -58,10 +65,12 @@ for idx, _tracker in enumerate(trackers.values()):
     # Create deep copies of the tracker to be used (so restart from 0)
     _trackers_list = []
     _timers_list = []
+    _object_count = []
     tracker = []
     for i in range(repeat_attempts):
         _trackers_list.append([])
         _timers_list.append([])
+        _object_count.append([])
         tracker.append(deepcopy(_tracker))
 
     for attempt_no in range(repeat_attempts):
@@ -86,20 +95,16 @@ for idx, _tracker in enumerate(trackers.values()):
                 # Detect vials
                 ret, bboxes, points = detector_func(frame)
 
-                # Extract bounding box coordinates
-                detection_bboxes = np.asarray([b[:-1] for b in bboxes]).reshape((-1,5))
-                bb_temp = []
-                for b in detection_bboxes:
-                    x1 = b[0]
-                    x2 = b[2]
-                    y1 = b[1]
-                    y2 = b[3]
-                    bb_temp.append([x1+ 0*(x2-x1)/2, y1 + 0*(y2-y1)/2, (x2-x1), y2-y1])
+                detection_bboxes = []
+                detection_confidences = []
+                detection_class_ids = []
 
-                # Update tracker (and draw bounding boxes)
-                detection_bboxes = np.asarray(bb_temp, dtype="int")
-                detection_confidences = np.ones(len(bboxes)).reshape((-1,))
-                detection_class_ids = np.ones(len(bboxes)).reshape((-1,))
+                # Format detections for tracker
+                convert_bbox = lambda b: [b[0], b[1], b[2]-b[0], b[3]-b[1]]
+                if len(bboxes) > 0:
+                    detection_bboxes = np.asarray([convert_bbox(b[:4]) for b in bboxes])
+                    detection_confidences = np.asarray([b[4] for b in bboxes])
+                    detection_class_ids = np.asarray([b[5] for b in bboxes])
 
                 # Time tracker update
                 with Timer() as tracker_timed:
@@ -109,10 +114,7 @@ for idx, _tracker in enumerate(trackers.values()):
                 
                 # Display frame contents
                 cv2.imshow("Frame", frame)
-
-                # Wait 16ms for user input - simulating 60FPS
-                # Note - could synchronise with timer and moving average for more control
-                key = cv2.waitKey(16) & 0xFF
+                key = cv2.waitKey(1) & 0xFF
 
                 # Escape / close if "q" pressed
                 if key == ord("q"):
@@ -121,10 +123,12 @@ for idx, _tracker in enumerate(trackers.values()):
             # Fetch the final tracker id to find total number of trackers instantiated
             tracker_ids = list(tracker[attempt_no].tracks.keys())
             final_id = tracker_ids[-1] if bool(tracker_ids) else 0
+            actual_id = gt_instance_count[frame_no]
 
             # Append attempt data to list
             _trackers_list[attempt_no].append(int(final_id))
             _timers_list[attempt_no].append(tracker_timed.elapsed)
+            _object_count[attempt_no].append(actual_id)
             
             # Break from loop early - for testing
             if bool(early_terminate):
@@ -136,33 +140,48 @@ for idx, _tracker in enumerate(trackers.values()):
     # Assign mean values to lists
     trackers_list[idx] = np.mean(np.asarray(_trackers_list), axis=0).tolist()
     timers_list[idx] = np.mean(np.asarray(_timers_list) * 1000, axis=0).tolist()
+    object_count[idx] = np.mean(np.asarray(_object_count), axis=0).tolist()
 
 # Graph the tracker count for the different trackers
 labels = ["SORT", "Centroid", "Centroid_KF", "IoU"]
 
+"""
+# For pgf output for Latex
+import matplotlib
+matplotlib.use("pgf")
+matplotlib.rcParams.update({
+    "pgf.texsystem": "pdflatex",
+    'font.family': 'serif',
+    'text.usetex': True,
+    'pgf.rcfonts': False,
+})
+"""
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.set_ylabel("Tracker Count")
-ax.set_xlabel("Frame Number (-)")
-t = np.arange(0, max([len(trk) for trk in trackers_list]))
+ax.set_ylabel("MAE Tracked Object Count")
+ax.set_xlabel("Ground Truth Cumulative Object Count")
 
+# Scatter plot of MAE in tracked object count vs actual object count
 for i in range(len(labels)):
-    ax.plot(t, trackers_list[i], label=labels[i])
+    ax.scatter(object_count[i], trackers_list[i], label=labels[i], s=10)
 ax.legend()
+
+# Set limits for plot
+ax.set_ylim([0, 1261])
+ax.set_xlim([0, 146])
 plt.tight_layout()
+
+# plt.savefig('MAE_Tracker.pgf')
 
 # Graph the frame time for the different trackers
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set_ylabel("Frame Time (ms)")
-ax.set_xlabel("Frame Number (-)")
-t = np.arange(0, max([len(trk) for trk in timers_list]))
-
-# Setting y limit to enalrge useful portion of chart
-#ax.set_ylim([0, 0.15])
+ax.set_xlabel("Ground Truth Cumulative Object Count")
 
 for i in range(len(labels)):
-    ax.plot(t, timers_list[i], label=labels[i])
+    ax.scatter(object_count[i], timers_list[i], label=labels[i], s=10)
 ax.legend()
 
 # Show the 30FPS line (realtime threshold)
@@ -171,10 +190,12 @@ ax.axhline(y=33.3, color='black', linestyle='--')
 ax.annotate(text="30FPS", xy =(ax.get_xlim()[1], 33.3 - 
             ax.get_ylim()[1] * 0.01), xycoords="data", color="black")
 
-# Enforce integer ticks on x-axis for discrete / integer frame numbers
-import matplotlib.ticker as ticker
-ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+# Set limits for plot
+ax.set_ylim([0, 111])
+ax.set_xlim([0, 146])
 plt.tight_layout()
+
+# plt.savefig('Frametime_Tracker.pgf')
 
 # Show plots
 plt.show()
