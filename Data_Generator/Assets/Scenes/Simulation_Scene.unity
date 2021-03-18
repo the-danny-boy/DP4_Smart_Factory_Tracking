@@ -640,7 +640,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 439808039c1a1f02c801712799a1ea20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  write_output: 0
+  write_output: 1
 --- !u!1 &771554742
 GameObject:
   m_ObjectHideFlags: 0
@@ -1208,7 +1208,7 @@ MonoBehaviour:
   spawnLimit: 50
   initial_spawn: 0
   spawn_period: 2
-  write_output: 0
+  write_output: 1
   cameraGameObject: {fileID: 720386592}
 --- !u!1 &2086680431
 GameObject:
