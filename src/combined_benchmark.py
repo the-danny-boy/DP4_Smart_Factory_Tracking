@@ -22,7 +22,7 @@ fake_overhead = 0.02
 
 # Define video stream
 SCALE_FACTOR = 0.5
-vs = VideoStream(src = "../Data_Generator/Assets/Outputs/2021-02-21_23h37m_Camera1_005.webm", 
+vs = VideoStream(src = "../Data_Generator/Assets/Outputs/2021-03-18_20h40m_Camera1_011.webm", 
                     fps = 30, height = int(1080*SCALE_FACTOR), width = int(1920*SCALE_FACTOR))
 
 # Define detector
