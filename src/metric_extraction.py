@@ -18,6 +18,8 @@ from centroid_tracker import Centroid_Tracker
 from utility_functions import crosshair, heron, regularity
 from itertools import combinations
 
+import scipy.spatial
+
 # Benchmark settings
 early_terminate = 200
 repeat_attempts = 3
@@ -67,42 +69,33 @@ while True:
         """ ========================================================= """
 
 
+    # VOIDS (SPATIAL DESCRIPTOR)
     with Timer() as void_timed:
-        # VOIDS (SPATIAL DESCRIPTOR)
-        # Create a subdiv using the frame geometry
-        rect = (0,0,frame.shape[1],frame.shape[0])
-        subdiv = cv2.Subdiv2D(rect)
+        
+        # Check if enough (3) points for triangulation
+        if len(points) > 3:
 
-        # Insert detected points into the subdiv, and fetch triangulation
-        for p in points:
-            subdiv.insert(p)
-        ts = subdiv.getTriangleList()
+            # Calculate delaunay triangulation
+            ts = scipy.spatial.Delaunay(points)
 
-        # Reshape the triangle list into matrix of point triples
-        pts_shaped = np.asarray(ts).reshape(-1,3,2)
-        for pts in pts_shaped:
+            # Select traingles
+            points = np.asarray(points)
+            pts_shaped = points[ts.simplices]
 
-            # Find the triangle area
-            ar = heron(pts[0], pts[1], pts[2])
+            # Combine heron (area) and regularity functions, and map to point list
+            comb_funcs = lambda x: (heron(x[0], x[1], x[2]), regularity(x[0], x[1], x[2]))
+            comb_outputs = list(map(comb_funcs, pts_shaped))
+            ar, reg = map(list, zip(*comb_outputs)) 
 
-            # Find the triangle regularity
-            reg = regularity(pts[0], pts[1], pts[2])
+            # Filter bad traingle points using logical numpy operator
+            bad_pts = pts_shaped[ np.logical_and((np.asarray(ar)>800), (np.asarray(reg) > 0.1)) ]
 
-            # Explicit void metric is combination of regularity and size
-            # => Check if too large or skewed (likely indicator of bad void)
-            if (reg > 0.1 and ar > 500) or ar > 800:
+            # Visualise this as a 50% opacity overlay
+            _frame = frame.copy()
+            for bp in bad_pts:
+                cv2.fillPoly(_frame, [bp], (0,0,255))
+            frame = cv2.addWeighted(frame, 0.5, _frame, 0.5, 0)
 
-                _frame = frame.copy()
-                
-                # Iterate through all pairs and draw lines
-                """for pt1, pt2 in combinations(pts, 2):
-                    cv2.line(_frame, tuple(pt1), tuple(pt2), (0,0,255), 4)"""
-
-                # Draw a filled polygon to highlight the void
-                pts = np.asarray(pts, dtype=np.int32)               
-
-                cv2.fillPoly(_frame, [pts], (0,0,255))
-                frame = cv2.addWeighted(frame, 0.5, _frame, 0.5, 0)
     print("Void process time (ms):", void_timed.elapsed)
 
     # Show annotated frame
