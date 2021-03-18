@@ -16,6 +16,19 @@ public class Spawner_Birdseye : MonoBehaviour
     [SerializeField] private float radius = 10f;
     [SerializeField] private int spawnLimit = 10;
 
+    [SerializeField] private int randomSeed = 42;
+
+    [SerializeField] private bool outputWrite = true;
+    [SerializeField] private bool tessellate = true;
+
+    [SerializeField] private Vector2 packingStart = new Vector2(0f, 0f);
+    [SerializeField] private Vector2 instanceSpacing = new Vector2(0.2f, 0.2f); // 0.2, 0.2
+    [SerializeField] private Vector2 instanceShift = new Vector2(-0.02f, 0.1f); // -0.02, 0.1
+
+    [SerializeField] private int colLimit = 40;
+    [SerializeField] private int rowLimit = 20;
+
+
     private List<GameObject> spawnedGameObjects = new List<GameObject>();
 
     public GameObject cameraGameObject;
@@ -33,7 +46,7 @@ public class Spawner_Birdseye : MonoBehaviour
         objectPooler = Object_Pooler.Instance;
         cam = cameraGameObject.GetComponent<Camera>();
         Physics.gravity = new Vector3(0f,0f,0f);
-        Random.InitState(42);
+        Random.InitState(randomSeed);
         position_data = new List<float[]>();
     }
 
@@ -50,8 +63,18 @@ public class Spawner_Birdseye : MonoBehaviour
     // Used to update the vial positions
     void Update()
     {
-        // Generate new list of points using Poisson Disc Sampling
-        List<Vector2> points = PoissonDiscSample(radius, spawnExtents, rejectionNumber, spawnLimit);
+
+        List<Vector2> points = new List<Vector2>();
+
+        if(tessellate)
+        {
+            // Generate new list of points by sampled offset pattern
+            points = PatternSample(packingStart, instanceSpacing, instanceShift, spawnExtents, spawnLimit, colLimit, rowLimit);
+        }
+        else {
+            // Generate new list of points using Poisson Disc Sampling
+            points = PoissonDiscSample(radius, spawnExtents, rejectionNumber, spawnLimit);
+        }
 
         // Iterate through all points
         for( int i = 0; i < points.Count; i++)
@@ -63,7 +86,7 @@ public class Spawner_Birdseye : MonoBehaviour
             // Generate overlap capsule for occupancy test
             Vector3 _pt1 = new Vector3(_pt3D.x, 0.5f, _pt3D.z);
             Vector3 _pt2 = new Vector3(_pt3D.x, 1f, _pt3D.z);
-            Collider[] colliders = Physics.OverlapCapsule(_pt1, _pt2, 0.5f);
+            Collider[] colliders = Physics.OverlapCapsule(_pt1, _pt2, 0.15f);
 
             // If no collisions, reposition or pull new from pool
             if (colliders.Length == 0)
@@ -123,19 +146,22 @@ public class Spawner_Birdseye : MonoBehaviour
             }
         }
 
-        // Format contents of position data to string delimited by newline
-        string writeText = "";
-        foreach(float[] _data in position_data)
+        if(outputWrite)
         {
-            string dataString = String.Join(" ", _data);
-            writeText += dataString + "\n";   
+            // Format contents of position data to string delimited by newline
+            string writeText = "";
+            foreach(float[] _data in position_data)
+            {
+                string dataString = String.Join(" ", _data);
+                writeText += dataString + "\n";   
+            }
+
+            // Write to file
+            File.WriteAllText("Data_Generator_Outputs/" + fileCounter + ".txt", writeText);
+
+            // Save out accompanying image
+            saveCameraView();
         }
-
-        // Write to file
-        File.WriteAllText("Data_Generator_Outputs/" + fileCounter + ".txt", writeText);
-
-        // Save out accompanying image
-        saveCameraView();
     }
 
 
@@ -179,13 +205,13 @@ public class Spawner_Birdseye : MonoBehaviour
         List<Vector2> activeList = new List<Vector2>();
 
         // Initialise cell size for 2-Dimensional sample space
-        float cellSize = _radius / Mathf.Sqrt(2);
+        float cellSize = _radius / Mathf.Sqrt(2f);
 
         // Initialise background grid of specified extent and resolution
         int[,] backgroundGrid = new int[Mathf.CeilToInt(_spawnExtents.x / cellSize), Mathf.CeilToInt(_spawnExtents.y / cellSize)];
 
         // Insert a random starting point (x0) into active list
-        activeList.Add(_spawnExtents / 2);
+        activeList.Add(_spawnExtents / 2f);
 
         // Repeat while valid candidate spaces in active list
         while (activeList.Count > 0 && spawnCount < _spawnLimit)
@@ -200,8 +226,8 @@ public class Spawner_Birdseye : MonoBehaviour
             for (int i = 0; i < _rejectionNumber; i++)
             {
                 // Generate random point from uniform distribution about annular area
-                float angle = Random.value * Mathf.PI * 2;
-                float dist = Mathf.Sqrt(Random.value * (Mathf.Pow(2f * _radius, 2) - Mathf.Pow(_radius, 2)) +
+                float angle = Random.value * Mathf.PI * 2f;
+                float dist = Mathf.Sqrt(Random.value * (Mathf.Pow(2f * _radius, 2f) - Mathf.Pow(_radius, 2f)) +
                                         Mathf.Pow(_radius, 2));
                 Vector2 pos = spawnCentre + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * dist;
 
@@ -265,6 +291,53 @@ public class Spawner_Birdseye : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+
+    // Function to generate list of points using a packing / tessellation strategy
+    List<Vector2> PatternSample(Vector2 packingStart, Vector2 instanceSpacing, Vector2 instanceShift, Vector2 spawnExtents, int spawnLimit, int colLimit, int rowLimit)
+    {
+
+        // Initialise some variables
+        List<Vector2> points = new List<Vector2>();
+        List<Vector2> _points = new List<Vector2>();
+
+        // Create a random offset in range of -0.1 to 0.1 to translate pattern
+        Vector2 randomOffset = new Vector2( (float)Random.value / 5f - 0.1f, (float)Random.value / 5f - 0.1f);
+
+        // Find offset position for bottom left of spawner
+        Vector2 positionOffset = new Vector2((spawnExtents.x - (instanceSpacing.x + instanceShift.x) * colLimit)/2f,
+                                             (spawnExtents.y - (instanceSpacing.y) * rowLimit)/2f);
+        
+        // Accumulate offsets for starting point
+        Vector2 startPt = packingStart + randomOffset + positionOffset;
+        
+        // Iterate through rows and columns and add point at target location (using parametric packing - hexagonal / square) 
+        for (int i = 0; i < colLimit; i++)
+        {
+            for (int j = 0; j < rowLimit; j++)
+            {
+                _points.Add(startPt + new Vector2(instanceSpacing.x * i, instanceSpacing.y * j) + 
+                                      new Vector2(instanceShift.x * i, instanceShift.y * (i % 2)));
+            }
+        }
+
+        // Perform reservoir sampling (select N random items from list)
+        int selectCount = spawnLimit;
+        for (int k = 0; k < _points.Count; k++)
+        {
+            // Select item with probability = no. of remaining items / total reservoir size
+            if(selectCount/(float)_points.Count > Random.value)
+            {
+                // Add item to the list, and decrement select count
+                points.Add(_points[k]);
+                selectCount--;
+            }
+        }
+
+        // Return sampled points
+        return points;
+        
     }
 
 }
