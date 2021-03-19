@@ -115,7 +115,7 @@ while True:
             """ ========================================================= """
     #print("Collision process time (ms):", collision_timed.elapsed)
 
-
+    _frame = frame.copy()
     # VOIDS (SPATIAL DESCRIPTOR)
     with Timer() as void_timed:
         
@@ -134,19 +134,41 @@ while True:
             comb_outputs = list(map(comb_funcs, pts_shaped))
             ar, reg = map(list, zip(*comb_outputs)) 
 
-            # Filter bad traingle points using logical numpy operator
-            bad_pts = pts_shaped[ np.logical_and((np.asarray(ar)>800), (np.asarray(reg) > 0.1)) ]
+            # Colorise good packing as green (colour all using convex hull)
+            conv = points[scipy.spatial.ConvexHull(points).vertices]
+            cv2.fillPoly(_frame, [conv], (0,255,0))
 
-            # Visualise this as a 50% opacity overlay
-            _frame = frame.copy()
+            # Define criteria for good / ok / bad packing
+            area_ok = 553
+            area_ok_reg = 153
+            reg_ok = 0.1
+            area_bad = 858
+            area_bad_reg = 625
+            reg_bad = 0.46
+
+            # Filter other severities of packing using logical numpy operator
+            ok_pts = pts_shaped[ np.logical_or((np.asarray(ar)>area_ok), np.logical_and((np.asarray(ar)>area_ok_reg), (np.asarray(reg) > reg_ok))) ]
+            bad_pts = pts_shaped[ np.logical_or((np.asarray(ar)>area_bad), np.logical_and((np.asarray(ar)>area_bad_reg), (np.asarray(reg) > reg_bad))) ]
+
+            for op in ok_pts:
+                cv2.fillPoly(_frame, [op], (0,255,255))
+
             for bp in bad_pts:
                 cv2.fillPoly(_frame, [bp], (0,0,255))
+
+            # Ideally sample barycentric coordinates for smooth transitions (but slow)
+            _frame = cv2.GaussianBlur(_frame, (15,15), 0)
+
+            # Visualise this as a 50% opacity overlay
             frame = cv2.addWeighted(frame, 0.5, _frame, 0.5, 0)
+
 
     #print("Void process time (ms):", void_timed.elapsed)
 
     print("Total metric time (ms):", collision_timed.elapsed + void_timed.elapsed)
 
+    for p in points:
+        crosshair(frame, p, size = 8, color = (0,0,0))
 
     # Show annotated frame
     cv2.imshow("Frame", frame)
