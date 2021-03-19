@@ -56,17 +56,64 @@ while True:
     # Update Tracker
     objectID, trackedObjects = tracker.update(objectID, points)
 
-    # Iterate through tracked objects and annotate
-    for idx, object in zip(trackedObjects.keys(), trackedObjects.values()):
-        #crosshair(frame, object["positions"][-1], size = 8, color = (0,0,255))
-        pass
+    with Timer() as collision_timed:
+
+        population_metrics = {"time":[], "velocity":[], "damage":[]}
+
+        # Iterate through tracked objects and annotate
+        for idx, object in zip(trackedObjects.keys(), trackedObjects.values()):
+            #crosshair(frame, object["positions"][-1], size = 8, color = (0,0,255))
+            #pass
 
 
-        """ Insert metrics code here ================================ """
+            """ Insert metrics code here ================================ """
+            # Read position deque for tracked object and calculate framewise differences for velocity
+            if len(object["positions"]) > 5:
+                
+                k_scale = 0.01 # Calibration parameter for scaling between image and real world dimensions                
+                dt = 1 / 30 # Time increment per frame
 
+                # Find frame-wise motion properties
+                positions = np.asarray(object["positions"]) * k_scale
+                velocities = np.diff(positions, axis=0) / dt
+                accelerations = np.diff(velocities, axis=0) / dt
+                mean_acceleration = np.mean(accelerations, axis=0)
+                acceleration_norm = np.linalg.norm(mean_acceleration)
 
+                # High speed (greater changer momentum) collisions contribute to more damage (E=0.5mv^2) => quadratic relation
+                # Impacts can cause failure through crack propagation if energetic enough
+                # Otherwise cause microcrack formation (which shall be ignored - simplifying assumption)
+                damage_speed = 0
+                if acceleration_norm > 10:
+                    # Increment a damage quantity proportional to squared impact velocity if acceleration norm large enough
+                    k_speed = 0.01
+                    impact_speed = np.linalg.norm(np.mean(velocities[-4:-1], axis=0))
+                    damage_speed = k_speed * impact_speed * impact_speed
 
-        """ ========================================================= """
+                    # Visualise instant collisions (yellow)
+                    crosshair(frame, object["positions"][-1], size = 8, color = (0,255,255))
+
+                # More time in the system increases likeliness of repeated / cyclical loading - incremental
+                k_time = 1
+                damage_time = k_time * dt
+
+                # Combine damage metrics
+                damage_delta = damage_speed + damage_time
+
+                object["damage"] += damage_delta
+
+                # Hydrostatic, propagations - TO DO
+
+                # Visualise damaged candidates (red)
+                if object["damage"] > 10:
+                    crosshair(frame, object["positions"][-1], size = 8, color = (0,0,255))
+
+                population_metrics["time"].append(object["time"])
+                population_metrics["velocity"].append(object["time"])
+                population_metrics["damage"].append(object["damage"])
+
+            """ ========================================================= """
+    #print("Collision process time (ms):", collision_timed.elapsed)
 
 
     # VOIDS (SPATIAL DESCRIPTOR)
@@ -96,7 +143,10 @@ while True:
                 cv2.fillPoly(_frame, [bp], (0,0,255))
             frame = cv2.addWeighted(frame, 0.5, _frame, 0.5, 0)
 
-    print("Void process time (ms):", void_timed.elapsed)
+    #print("Void process time (ms):", void_timed.elapsed)
+
+    print("Total metric time (ms):", collision_timed.elapsed + void_timed.elapsed)
+
 
     # Show annotated frame
     cv2.imshow("Frame", frame)
