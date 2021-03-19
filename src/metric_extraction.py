@@ -42,6 +42,10 @@ vs.start()
 frame_no = 0
 objectID = 1
 
+times = []
+speeds = []
+damages = []
+
 # Main logic loop
 while True:
 
@@ -76,6 +80,8 @@ while True:
                 # Find frame-wise motion properties
                 positions = np.asarray(object["positions"]) * k_scale
                 velocities = np.diff(positions, axis=0) / dt
+                mean_speed = np.linalg.norm(np.mean(velocities, axis=0))
+
                 accelerations = np.diff(velocities, axis=0) / dt
                 mean_acceleration = np.mean(accelerations, axis=0)
                 acceleration_norm = np.linalg.norm(mean_acceleration)
@@ -109,11 +115,19 @@ while True:
                     crosshair(frame, object["positions"][-1], size = 8, color = (0,0,255))
 
                 population_metrics["time"].append(object["time"])
-                population_metrics["velocity"].append(object["time"])
+                population_metrics["velocity"].append(mean_speed)
                 population_metrics["damage"].append(object["damage"])
 
             """ ========================================================= """
     #print("Collision process time (ms):", collision_timed.elapsed)
+
+    times.append(population_metrics["time"])
+    speeds.append(population_metrics["velocity"])
+    damages.append(population_metrics["damage"])
+
+    print(f'Population residence time: Mean = {np.mean(population_metrics["time"])}, SD = {np.std(population_metrics["time"])}')
+    print(f'Population velocity: Mean = {np.mean(population_metrics["velocity"])}, SD = {np.std(population_metrics["velocity"])}')
+    print(f'Population damage: Mean = {np.mean(population_metrics["damage"])}, SD = {np.std(population_metrics["damage"])}')
 
     _frame = frame.copy()
     # VOIDS (SPATIAL DESCRIPTOR)
@@ -147,14 +161,14 @@ while True:
             reg_bad = 0.46
 
             # Filter other severities of packing using logical numpy operator
-            ok_pts = pts_shaped[ np.logical_or((np.asarray(ar)>area_ok), np.logical_and((np.asarray(ar)>area_ok_reg), (np.asarray(reg) > reg_ok))) ]
-            bad_pts = pts_shaped[ np.logical_or((np.asarray(ar)>area_bad), np.logical_and((np.asarray(ar)>area_bad_reg), (np.asarray(reg) > reg_bad))) ]
+            warn_pts = pts_shaped[ np.logical_or((np.asarray(ar)>area_ok), np.logical_and((np.asarray(ar)>area_ok_reg), (np.asarray(reg) > reg_ok))) ]
+            crit_pts = pts_shaped[ np.logical_or((np.asarray(ar)>area_bad), np.logical_and((np.asarray(ar)>area_bad_reg), (np.asarray(reg) > reg_bad))) ]
 
-            for op in ok_pts:
-                cv2.fillPoly(_frame, [op], (0,255,255))
+            for wp in warn_pts:
+                cv2.fillPoly(_frame, [wp], (0,255,255))
 
-            for bp in bad_pts:
-                cv2.fillPoly(_frame, [bp], (0,0,255))
+            for cp in crit_pts:
+                cv2.fillPoly(_frame, [cp], (0,0,255))
 
             # Ideally sample barycentric coordinates for smooth transitions (but slow)
             _frame = cv2.GaussianBlur(_frame, (15,15), 0)
@@ -162,10 +176,12 @@ while True:
             # Visualise this as a 50% opacity overlay
             frame = cv2.addWeighted(frame, 0.5, _frame, 0.5, 0)
 
+            print(f"INFO: There are {len(warn_pts)} warning regions")
+            print(f"INFO: There are {len(crit_pts)} critical regions")
 
     #print("Void process time (ms):", void_timed.elapsed)
 
-    print("Total metric time (ms):", collision_timed.elapsed + void_timed.elapsed)
+    #print("Total metric time (ms):", collision_timed.elapsed + void_timed.elapsed)
 
     for p in points:
         crosshair(frame, p, size = 8, color = (0,0,0))
@@ -185,3 +201,15 @@ while True:
 # Tidy up - close windows and stop video stream object
 cv2.destroyAllWindows()
 vs.stop()
+
+"""
+# Can boxplot a range of frames to see distribution in population quantities
+import matplotlib.pyplot as plt
+
+for i in range(60,80):
+    plt.boxplot(np.asarray(times[i]), positions = [i])
+    plt.boxplot(np.asarray(speeds[i]), positions = [i])
+    plt.boxplot(np.asarray(damages[i]), positions = [i])
+
+plt.show()
+"""
