@@ -34,7 +34,7 @@ hsv = partial(hsvDetect, hue_low = 0, hue_high = 179,
                     val_low = 56, val_high = 255, debug = False)
 
 template0 = partial(templateMatch, match_threshold = 30, template_path_idx = 0)
-template1 = partial(templateMatch, match_threshold = 60, template_path_idx = 1)
+template1 = partial(templateMatch, match_threshold = 50, template_path_idx = 1)
 model = setup()
 yolo = partial(detect_wrapper, model=model, debug=False)
 

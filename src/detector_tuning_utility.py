@@ -52,6 +52,13 @@ def trackbarSetup(window_name, detector_type):
 if __name__ == "__main__":
     SCALE_FACTOR = 0.5
 
+    # Boolean flag for whether using video footage (else - training images)
+    vid = False
+
+    # Define video stream
+    vs = VideoStream(src = "../Data_Generator/Assets/Outputs/2021-02-21_23h37m_Camera1_005.webm", 
+                    fps = 30, height = int(1080*SCALE_FACTOR), width = int(1920*SCALE_FACTOR))
+
     # Grab all image paths
     image_paths = r"ScaledYOLOv4/vials/train/images/"
     images = sorted(glob.glob(image_paths + "*.jpg"))
@@ -75,7 +82,12 @@ if __name__ == "__main__":
     cv2.namedWindow(window_name)    
 
     # Create trackbar to scrape through frames
-    cv2.createTrackbar("Frame No.", window_name, 0, len(images)-1, nothing)
+    if vid:
+        vs.start()
+        cv2.createTrackbar("Frame No.", window_name, 0, int(vs.cap.get(cv2.CAP_PROP_FRAME_COUNT)-1), nothing)
+    else:
+        cv2.createTrackbar("Frame No.", window_name, 0, len(images)-1, nothing)
+
     parameters = trackbarSetup(window_name, detector_type)
     parameter_settings = [None] * len(parameters.keys())
 
@@ -84,9 +96,19 @@ if __name__ == "__main__":
 
         # Fetch target frame using trackbar
         frame_no=cv2.getTrackbarPos("Frame No.", window_name)
-        frame = cv2.imread(images[frame_no])
-        frame = cv2.resize(frame, (int(frame.shape[1] * SCALE_FACTOR), int(frame.shape[0] * SCALE_FACTOR)))
+
+
+        # Check if need to acquire video or image, and handle accordingly
+        if vid:
+            vs.cap.set(cv2.CAP_PROP_POS_FRAMES, frame_no)
+            ret, frame = next(vs.read())
+            if not ret:
+                break
+        else:
+            frame = cv2.imread(images[frame_no])
+            frame = cv2.resize(frame, (int(frame.shape[1] * SCALE_FACTOR), int(frame.shape[0] * SCALE_FACTOR)))
     
+
         # Fetch detector parameters from the trackbars
         for index, parameter in enumerate(parameters.keys()):
             parameter_settings[index] = cv2.getTrackbarPos(parameter, window_name)
@@ -102,11 +124,8 @@ if __name__ == "__main__":
         # Display frame contents
         cv2.imshow(window_name, frame)
 
-        # Wait 16ms for user input - simulating 60FPS
-        # Note - could synchronise with timer and moving average for more control
-        key = cv2.waitKey(16) & 0xFF
-
         # Escape / close if "q" pressed
+        key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
             break
     

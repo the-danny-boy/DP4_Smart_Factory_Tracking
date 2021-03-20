@@ -6,20 +6,19 @@ This script extracts the RoIs from the training images to create an averaged tem
 import numpy as np
 import cv2
 import glob
+import os
 
 # Path for training data (images, labels)
-image_path = r"ScaledYOLOv4/vials/train/images/"
-label_path = r"ScaledYOLOv4/vials/train/labels/"
+output_root_directory = r"../Data_Generator/Data_Generator_Outputs/"
+image_paths = [os.path.join(output_root_directory, dir_item, "train", "images")+"/" for dir_item in os.listdir(output_root_directory)]
+label_paths = [os.path.join(output_root_directory, dir_item, "train", "labels")+"/" for dir_item in os.listdir(output_root_directory)]
 
 # Find all items at target path
-images = glob.glob(image_path + "*.jpg")
-labels = glob.glob(label_path + "*.txt")
-
-"""
-# Extract numeric ids for consistent sorting
-images_idx = [int(image[:-4]) for image in images]
-labels_idx = [int(label[:-4]) for label in labels]
-"""
+images = []
+labels = []
+for image_path, label_path in zip(image_paths, label_paths):
+    images.extend(glob.glob(image_path + "*.jpg"))
+    labels.extend(glob.glob(label_path + "*.txt"))
 
 # Better method - sort alphabetically
 # Not numerically increasing, but is consistent
@@ -63,6 +62,26 @@ for img_file, dets_file in zip(images, labels):
 roi = np.mean(rois, axis=0)
 roi = np.asarray(roi, dtype = "uint8")
 
-# Write out averaged image, and inform user or completion
-cv2.imwrite("Template_Averaged.png", roi)
+# Resize to half resolution
+roi = cv2.resize(roi, (int(roi.shape[1] * 0.5), int(roi.shape[0] * 0.5)))
+
+# Now rotate the image to get a mean rotational image
+mean_imgs = []
+(h, w) = roi.shape[:2]
+for theta in range(0, 360, 45):
+    center = (w / 2, h / 2)
+    M = cv2.getRotationMatrix2D(center, theta, 1)
+    rotated = cv2.warpAffine(roi, M, (w, h))
+    mean_imgs.append(rotated)
+
+# Find the mean of the images
+avg = np.mean(mean_imgs, axis=0)
+avg = np.asarray(avg, dtype = "uint8")
+
+# Crop to the region of interest
+radius = 15
+avg = avg[int(h/2 - radius):int(h/2 + radius), int(w/2 - radius):int(w/2 + radius)]
+cv2.imwrite("Template_Averaged_half_crop.png", avg)
+
+# Alert user of completion
 print("Done generating averaged template")
