@@ -18,6 +18,7 @@ from YOLO_detector_wrapper import setup, detect_wrapper
 from functools import partial
 
 import os
+import math
 
 output_root_directory = r"../Data_Generator/Data_Generator_Outputs/"
 
@@ -156,13 +157,16 @@ for image_paths, label_paths in zip(image_count_variants, label_count_variants):
             det["Precision"] = precision
             det["Recall"] = recall
 
-        # Find the Average Precision (AP)
-        ap = np.trapz([d["Precision"] for d in sorted_detections], \
-            [d["Recall"] for d in sorted_detections])
+        # Find the 11-pt interpolated Average Precision (AP)
+        precisions = np.asarray([d["Precision"] for d in sorted_detections])
+        recalls = np.asarray([d["Recall"] for d in sorted_detections])
+        ap_interpolate = 1/11 * sum([max(precisions[recalls>n/10]) \
+                 for n in range(0,math.ceil(max(recalls)*10))])
+        #print("Interpolated AP:", ap_interpolate)
         
         # Append detector metrics to list
         detection_times.append(np.mean(_detection_times))
-        detector_aps.append(ap)
+        detector_aps.append(ap_interpolate)
 
     # Print out metrics
     #print("Detectors: Hough, HSV, Template (Raw), Template (Averaged), YOLO")
@@ -187,21 +191,42 @@ ax = fig.add_subplot(111)
 
 # Plot the performance data
 detector_labels = ["Hough", "HSV", "Template (Raw)", "Template (Averaged)", "Scaled-YOLOv4"]
+colors = plt.rcParams['axes.prop_cycle'].by_key()['color'][:len(detector_labels)]
 for i in range(len(grouped_times)):
     # Reorder the metrics to satisfy increasing detector counts (hard coded, but could do programatically)
     grouped_times[i] = [grouped_times[i][2], grouped_times[i][0], grouped_times[i][1]]
     grouped_accs[i] = [grouped_accs[i][2], grouped_accs[i][0], grouped_accs[i][1]]
-    ax.plot(grouped_times[i], grouped_accs[i], label=detector_labels[i])
+
+    # Plot the line
+    ax.plot(grouped_times[i], grouped_accs[i], label=detector_labels[i], color = colors[i])
+    
+    # Draw markers for each point
+    markers = ["o", "s", "v"]
+    for j in range(0, len(grouped_times[i])):
+        ax.plot(grouped_times[i][j], grouped_accs[i][j], markers[j], color = colors[i], fillstyle="none")
 
 # Plot the 30FPS line
 import matplotlib.transforms as transforms
 ax.axvline(x=33.3, color='black', linestyle='--')
-ax.annotate(text="30FPS", xy =(33.3 - ax.get_xlim()[1] * 0.1, 0.02), \
+ax.annotate(text="30 FPS", xy =(33.3 - ax.get_xlim()[1] * 0.1 - 2, 0.02), \
             xycoords="data", color="black")
 
-# Set axes and legend, then show
+# Set axes labels
 ax.set_xlabel("Detection Speed (ms/image)")
-ax.set_ylabel("Test AP")
-ax.legend()
+ax.set_ylabel("Test AP (dimensionless)")
+
+# Add markers to legend
+handles, labels = ax.get_legend_handles_labels()
+from matplotlib.lines import Line2D
+legend_additions = [Line2D([0], [0], marker='o', color='w', label='5 objects',
+                          markeredgecolor='gray', markersize=6, fillstyle="none"),
+         Line2D([0], [0], marker='s', color='w', label='50 objects',
+                          markeredgecolor='gray', markersize=6, fillstyle="none"), 
+         Line2D([0], [0], marker='v', color='w', label='500 objects',
+                          markeredgecolor='gray', markersize=6, fillstyle="none")]
+handles.extend(legend_additions) 
+ax.legend(handles=handles)
+
+# Resize and show plot
 plt.tight_layout()
 plt.show()
