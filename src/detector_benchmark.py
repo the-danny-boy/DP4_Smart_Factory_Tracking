@@ -186,6 +186,18 @@ grouped_accs = [[item[i] for item in comparison_accs] for i in range(len(compari
 # Set up plots
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
+
+# For pgf output for Latex
+import matplotlib
+matplotlib.use("pgf")
+matplotlib.rcParams.update({
+    "pgf.texsystem": "pdflatex",
+    'font.family': 'serif',
+    'text.usetex': True,
+    'pgf.rcfonts': False,
+})
+
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
@@ -228,5 +240,9 @@ handles.extend(legend_additions)
 ax.legend(handles=handles)
 
 # Resize and show plot
+ax.set_ylim([0, 1])
+ax.set_xlim([0, 80])
 plt.tight_layout()
-plt.show()
+
+plt.savefig('Detector_Benchmark.pgf')
+#plt.show()
