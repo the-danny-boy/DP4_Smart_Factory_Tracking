@@ -20,7 +20,7 @@ from motrackers import CentroidTracker, IOUTracker, CentroidKF_Tracker, SORT
 from motrackers.utils import draw_tracks
 
 # Benchmark settings
-early_terminate = 200
+early_terminate = 165
 repeat_attempts = 3
 
 # Define each of the trackers
@@ -145,7 +145,7 @@ for idx, _tracker in enumerate(trackers.values()):
 # Graph the tracker count for the different trackers
 labels = ["SORT", "Centroid", "Centroid_KF", "IoU"]
 
-"""
+
 # For pgf output for Latex
 import matplotlib
 matplotlib.use("pgf")
@@ -155,50 +155,53 @@ matplotlib.rcParams.update({
     'text.usetex': True,
     'pgf.rcfonts': False,
 })
-"""
 
-fig = plt.figure()
+plt.rcParams.update({'font.size': 30})
+fig = plt.figure(figsize=(9, 8))
 ax = fig.add_subplot(111)
-ax.set_ylabel("MAE Tracked Object Count")
-ax.set_xlabel("Ground Truth Cumulative Object Count")
+ax.set_ylabel("MAE Tracker Count")
+ax.set_xlabel("Ground Truth Object Count")
 
 # Scatter plot of MAE in tracked object count vs actual object count
 for i in range(len(labels)):
-    ax.scatter(object_count[i], trackers_list[i], label=labels[i], s=10)
+    ax.scatter(object_count[i], trackers_list[i], label=labels[i], s=35)
 ax.legend()
 
 # Set limits for plot
-ax.set_ylim([0, 1261])
-ax.set_xlim([0, 146])
-plt.tight_layout()
+ax.set_ylim([0, 1000])
+ax.set_xlim([0, 100])
 
-# plt.savefig('MAE_Tracker.pgf')
+# Save out plot
+plt.rcParams.update({'font.size': 30})
+plt.savefig('Tracker_MAE.pgf')
+
 
 # Graph the frame time for the different trackers
-fig = plt.figure()
+fig = plt.figure(figsize=(9, 8))
 ax = fig.add_subplot(111)
 ax.set_ylabel("Frame Time (ms)")
-ax.set_xlabel("Ground Truth Cumulative Object Count")
+ax.set_xlabel("Ground Truth Object Count")
 
 for i in range(len(labels)):
-    ax.scatter(object_count[i], timers_list[i], label=labels[i], s=10)
+    ax.scatter(object_count[i], timers_list[i], label=labels[i], s=35)
 ax.legend()
 
 # Show the 30FPS line (realtime threshold)
 import matplotlib.transforms as transforms
 ax.axhline(y=33.3, color='black', linestyle='--')
-ax.annotate(text="30FPS", xy =(ax.get_xlim()[1], 33.3 - 
-            ax.get_ylim()[1] * 0.01), xycoords="data", color="black")
+ax.annotate(text="30 FPS", xy =(2, 33.3 + 
+            ax.get_ylim()[1] * 0.01 - 1), xycoords="data", color="black")
 
 # Set limits for plot
-ax.set_ylim([0, 111])
-ax.set_xlim([0, 146])
-plt.tight_layout()
+ax.set_ylim([0, 70])
+ax.set_xlim([0, 100])
 
-# plt.savefig('Frametime_Tracker.pgf')
+# Save out plot
+plt.rcParams.update({'font.size': 30})
+plt.savefig('Tracker_Speed.pgf')
 
 # Show plots
-plt.show()
+#plt.show()
 
 # Tidy up - close windows and stop video stream object
 cv2.destroyAllWindows()
