@@ -16,7 +16,8 @@ def setup():
     # Setup params
     device = select_device("")
     imgsz = 416
-    weights = "runs/exp5_yolov4-csp-orig-1k-200/weights/best_yolov4-csp-orig-1k-200_strip.pt"
+    #weights = "runs/exp5_yolov4-csp-orig-1k-200/weights/best_yolov4-csp-orig-1k-200_strip.pt"
+    weights = "runs/weights/exp11_500inst_ext_mix3/best_500inst_ext_mix3_strip.pt"
 
     # Load an initial model and use this to warm up
     model = attempt_load(weights, map_location = device)

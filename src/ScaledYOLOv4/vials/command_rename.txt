@@ -1,0 +1,2 @@
+find . -depth -name "*.jpg" -exec sh -c 'f="{}"; mv -- "$f" "${f%.jpg}_50.jpg"' \;
+

@@ -16,7 +16,8 @@ def setup():
     # Setup params
     device = select_device("")
     imgsz = 416
-    weights = "ScaledYOLOv4/runs/exp5_yolov4-csp-orig-1k-200/weights/best_yolov4-csp-orig-1k-200_strip.pt"
+    #weights = "ScaledYOLOv4/runs/exp5_yolov4-csp-orig-1k-200/weights/best_yolov4-csp-orig-1k-200_strip.pt"
+    weights = "ScaledYOLOv4/runs/exp11_500inst_ext_mix3/weights/best_500inst_ext_mix3_strip.pt"
 
     # Load an initial model and use this to warm up
     model = attempt_load(weights, map_location = device)
@@ -36,8 +37,8 @@ def detect(frame, model):
     half = False
     agnostic_nms = False
     classes = None
-    conf_thres = 0.5
-    iou_thres = 0.4
+    conf_thres = 0.3
+    iou_thres = 0.1
 
     # Resize the input image
     img = letterbox(frame, new_shape=imgsz)[0]
