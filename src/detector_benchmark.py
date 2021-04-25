@@ -225,7 +225,7 @@ ax.annotate(text="30 FPS", xy =(33.3 - ax.get_xlim()[1] * 0.1 - 2, 0.02), \
 
 # Set axes labels
 ax.set_xlabel("Detection Speed (ms/image)")
-ax.set_ylabel("Test AP (dimensionless)")
+ax.set_ylabel("Test AP")
 
 # Add markers to legend
 handles, labels = ax.get_legend_handles_labels()
