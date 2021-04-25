@@ -128,10 +128,10 @@ total_times_avg = np.mean(np.asarray(total_times) * 1000, axis=0).tolist()
 import matplotlib.pyplot as plt
 fig,ax = plt.subplots()
 ax.set_ylabel("Frame Time (ms)")
-ax.set_xlabel("Frame Number (-)")
+ax.set_xlabel("Frame Number")
 
 ax.set_ylim(0,80)
-ax.set_xlim(0,len(total_times_avg)-1)
+ax.set_xlim(0,len(total_times_avg)-2)
 
 # Generate array for x data
 t = np.arange(0, len(total_times_avg))
@@ -150,8 +150,9 @@ ax.legend()
 # Show the 30FPS line (realtime threshold)
 import matplotlib.transforms as transforms
 ax.axhline(y=33.3, color='black', linestyle='--')
-ax.annotate(text="30FPS", xy =(ax.get_xlim()[1], 33.3 - 
-            ax.get_ylim()[1] * 0.01), xycoords="data", color="black")
+#ax.annotate(text="30FPS", xy =(ax.get_xlim()[1], 33.3 - 
+ax.annotate(text="30 FPS", xy =(3, 33.3 + 
+            ax.get_ylim()[1] * 0.01 + 1.5), xycoords="data", color="black")
 
 # Enforce integer ticks on x-axis for discrete / integer frame numbers
 import matplotlib.ticker as ticker
