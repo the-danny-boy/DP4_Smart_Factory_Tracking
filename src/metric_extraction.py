@@ -17,14 +17,31 @@ from YOLO_detector_wrapper import setup, detect_wrapper
 from centroid_tracker import Centroid_Tracker
 
 from utility_functions import crosshair, heron, regularity
-from itertools import combinations
+from itertools import combinations, compress
 
 import scipy.spatial
 
 # Benchmark settings
 early_terminate = 200
 repeat_attempts = 3
-fake_overhead = 0.02
+
+# Environment Support Geometry
+raw_pts = np.asarray([[0,212], [260,487], [404, 486], [400, 327], [410, 328], [959, 147], [959, 538], [0, 537], [0,212]])
+contour = np.array(raw_pts[:-1]).reshape((-1,1,2)).astype(np.int32)
+
+# Define subdivision size for void detection
+subdiv_distance = 30
+
+# Define criteria for good / ok / bad packing => Void detection
+area_ok = 524
+area_ok_reg = 519
+reg_ok = 0.08
+area_bad = 643
+area_bad_reg = 563
+reg_bad = 0.04
+
+# Define criteria for collision propagation
+collision_dist = 50     
 
 # Define video stream
 SCALE_FACTOR = 0.5
@@ -34,7 +51,6 @@ vs = VideoStream(src = "../Data_Generator/Assets/Outputs/2021-03-18_20h40m_Camer
 # Define detector
 model = setup()
 detector_func = partial(detect_wrapper, model=model, debug=False)
-
 tracker = Centroid_Tracker(max_lost=3)
 
 # Start the video stream object
@@ -61,17 +77,13 @@ while True:
     # Update Tracker
     objectID, trackedObjects = tracker.update(objectID, points)
 
-    with Timer() as collision_timed:
+    with Timer() as damage_timed:
 
         population_metrics = {"time":[], "velocity":[], "damage":[]}
 
         # Iterate through tracked objects and annotate
         for idx, object in zip(trackedObjects.keys(), trackedObjects.values()):
-            #crosshair(frame, object["positions"][-1], size = 8, color = (0,0,255))
-            #pass
 
-
-            """ Insert metrics code here ================================ """
             # Read position deque for tracked object and calculate framewise differences for velocity
             if len(object["positions"]) > 5:
                 
@@ -92,24 +104,42 @@ while True:
                 # Otherwise cause microcrack formation (which shall be ignored - simplifying assumption)
                 damage_speed = 0
                 if acceleration_norm > 10:
+
                     # Increment a damage quantity proportional to squared impact velocity if acceleration norm large enough
                     k_speed = 0.01
                     impact_speed = np.linalg.norm(np.mean(velocities[-4:-1], axis=0))
                     damage_speed = k_speed * impact_speed * impact_speed
+                    # Note - coefficient should take into account ability to double up application, or only exert once in collision with wall
 
                     # Visualise instant collisions (yellow)
                     crosshair(frame, object["positions"][-1], size = 8, color = (0,255,255))
 
-                # More time in the system increases likeliness of repeated / cyclical loading - incremental
+                    # Damage sharing
+                    # Extract position of this object and all others (separately)
+                    this_pos = object["positions"][-1]
+                    other_pos = [trackedObjects[k]["positions"][-1] for k in trackedObjects.keys() if k != idx]
+
+                    # Find the euclidean distance between current point and all others
+                    positions_rep = np.tile(this_pos, (len(other_pos),1))
+                    norm_diff = np.linalg.norm(other_pos - positions_rep, axis=1)
+
+                    # If close, extract tracker id (key) for incrementing damage
+                    collided_instances = norm_diff <= collision_dist
+                    indices = list(compress(range(len(collided_instances)), collided_instances))
+                    collision_keys = [list(trackedObjects.keys())[_t] for _t in indices]
+                    
+                    # Add damage equal to collision intensity
+                    for collision_key in collision_keys:
+                        trackedObjects[collision_key]["damage"] += damage_speed
+
+
+                # More time in the system increases likeliness of repeated / cumulative loading - incremental
                 k_time = 1
                 damage_time = k_time * dt
 
                 # Combine damage metrics
                 damage_delta = damage_speed + damage_time
-
                 object["damage"] += damage_delta
-
-                # Hydrostatic, propagations - TO DO
 
                 # Visualise damaged candidates (red)
                 if object["damage"] > 10:
@@ -119,9 +149,10 @@ while True:
                 population_metrics["velocity"].append(mean_speed)
                 population_metrics["damage"].append(object["damage"])
 
-            """ ========================================================= """
-    #print("Collision process time (ms):", collision_timed.elapsed)
+    #print("Damage process time (ms):", damage_timed.elapsed)
 
+    # Log and print population metrics
+    """
     times.append(population_metrics["time"])
     speeds.append(population_metrics["velocity"])
     damages.append(population_metrics["damage"])
@@ -129,63 +160,62 @@ while True:
     print(f'Population residence time: Mean = {np.mean(population_metrics["time"])}, SD = {np.std(population_metrics["time"])}')
     print(f'Population velocity: Mean = {np.mean(population_metrics["velocity"])}, SD = {np.std(population_metrics["velocity"])}')
     print(f'Population damage: Mean = {np.mean(population_metrics["damage"])}, SD = {np.std(population_metrics["damage"])}')
-
-    _frame = frame.copy()
-    blank_canvas = np.zeros(_frame.shape)
-    orig_points = deepcopy(points)
+    """
 
 
     # VOIDS (SPATIAL DESCRIPTOR)
+    # Create canvas for image-based void counting
+    blank_canvas = np.zeros(frame.shape)
     with Timer() as void_timed:
         
         # Check if enough (3) points for triangulation
         if len(points) > 3:
 
-            
-
-            ppp = deepcopy(points)
-
-            contour = np.asarray([[0,212], [260,487], [404, 486], [400, 327], [410, 328], [959, 147], [959, 538], [0, 537]])
-            contour = np.array(contour).reshape((-1,1,2)).astype(np.int32)
-            raw_pts = np.asarray([[0,212], [260,487], [404, 486], [400, 327], [410, 328], [959, 147], [959, 538], [0, 537], [0,212]])
-
-
             allPt = []
-            subdiv_distance = 30
 
+            # Make copy of support contour points
             refPt = deepcopy(raw_pts)
 
+            # Transform to numpy arrays, and create shifted version for distance calcs
             point1 = np.asarray(refPt)
             point2 = np.roll(point1, -1, axis = 0)
 
+            # Iterate over and add points to list (including subdivisions if required)
             for j in range(len(point1)-1):
                 
+                # Take two adjacent points and calculate the distance between these
                 p1 = point1[j]
                 p2 = point2[j]
-                
                 _p1 = list(map(int, p1))
                 allPt.append(_p1)
-
                 dist = np.linalg.norm(p2 - p1)
                 
+                # Perform subdivision of line segment if too large
                 if dist > subdiv_distance:
+
+                    # Find direction vector
                     dir_vector = np.subtract(p2, p1)
-                    sample_no = math.ceil(dist / subdiv_distance) # makes sure one extra => dense end
+
+                    # Find number of samples (round up to enforce maximum size)
+                    sample_no = math.ceil(dist / subdiv_distance)
+                    
+                    # Calculate subdivision (fragment) distance
                     fragd = subdiv_distance / dist
 
+                    # Iterate through and generate extra points
                     for i in range(sample_no):
                         vecPt = p1 + np.multiply(fragd * i, dir_vector)
                         _vecPt = list(map(int, vecPt))
                         allPt.append(_vecPt)
 
+                # Otherwise add (int) end point to list
                 else:
-
                     _p2 = list(map(int, p2))
                     allPt.append(_p2)
 
-
+            
+            # Extend original point array with support points
             points.extend(allPt)
-
 
             # Calculate delaunay triangulation
             ts = scipy.spatial.Delaunay(points)
@@ -194,13 +224,12 @@ while True:
             points = np.asarray(points)
             pts_shaped = points[ts.simplices]
 
-
+            # Find centre points
             px = np.asarray([(ptt[0][0] + ptt[1][0] + ptt[2][0]) / 3 for ptt in pts_shaped], dtype="int").reshape(-1,1)
             py = np.asarray([(ptt[0][1] + ptt[1][1] + ptt[2][1]) / 3 for ptt in pts_shaped], dtype="int").reshape(-1,1)
-
             pts = np.concatenate((px,py),axis = 1)
 
-
+            # Test if centre points in valid region => only keep valid triangle points
             in_contour = [cv2.pointPolygonTest(contour, tuple(pttt), False) for pttt in pts]
             pts = pts[np.asarray(in_contour) < 0]
             pts_shaped = pts_shaped[np.asarray(in_contour) < 0]
@@ -208,38 +237,22 @@ while True:
             # Combine heron (area) and regularity functions, and map to point list
             comb_funcs = lambda x: (heron(x[0], x[1], x[2]), regularity(x[0], x[1], x[2]))
             comb_outputs = list(map(comb_funcs, pts_shaped))
-            ar, reg = map(list, zip(*comb_outputs)) 
+            ar, reg = map(list, zip(*comb_outputs))
 
             # Colorise good packing as green (colour all using convex hull)
             conv = points[scipy.spatial.ConvexHull(points).vertices]
-            cv2.fillPoly(_frame, [conv], (0,255,0))
             cv2.fillPoly(blank_canvas, [conv], (0,255,0))
 
+            # Overlay / mask invalid region
             cv2.drawContours(blank_canvas,[contour],0,(0,0,0),-1)
-
-            # Define criteria for good / ok / bad packing
-            area_ok = 524
-            area_ok_reg = 519
-            reg_ok = 0.08
-            area_bad = 643
-            area_bad_reg = 563
-            reg_bad = 0.04
 
             # Filter other severities of packing using logical numpy operator
             warn_pts = pts_shaped[ np.logical_or((np.asarray(ar)>area_ok), np.logical_and((np.asarray(ar)>area_ok_reg), (np.asarray(reg) > reg_ok))) ]
             crit_pts = pts_shaped[ np.logical_or((np.asarray(ar)>area_bad), np.logical_and((np.asarray(ar)>area_bad_reg), (np.asarray(reg) > reg_bad))) ]
 
-            for wp in warn_pts:
-                cv2.fillPoly(_frame, [wp], (0,255,255))
-                cv2.fillPoly(blank_canvas, [wp], (255,0,0))
-
-            for cp in crit_pts:
-                cv2.fillPoly(_frame, [cp], (0,0,255))
-                cv2.fillPoly(blank_canvas, [cp], (0,0,255))
-
-            # Ideally sample barycentric coordinates for smooth transitions (but slow)
-            _frame = cv2.GaussianBlur(_frame, (15,15), 0)
-
+            # Colorise other regions
+            cv2.fillPoly(blank_canvas, warn_pts, (255,0,0))
+            cv2.fillPoly(blank_canvas, crit_pts, (0,0,255))
 
             # Combine adjacent regions and count
             good_canvas = cv2.inRange(blank_canvas, (0,10,0), (0,255,0))
@@ -257,9 +270,7 @@ while True:
             _warn_count, _labels = cv2.connectedComponents(warn_canvas)
             warn_count = _warn_count - 1
 
-
-            # Visualise this as a 50% opacity overlay
-            #frame = cv2.addWeighted(frame, 0.5, _frame, 0.5, 0)
+            # Visualise this as a 50% opacity overlap
             frame = cv2.addWeighted(frame, 0.5, blank_canvas.astype("uint8"), 0.5, 1)
 
             """
@@ -268,12 +279,14 @@ while True:
             print(f"INFO: There are {crit_count} critical regions")
             """
 
+
     #print("Void process time (ms):", void_timed.elapsed)
+    #print("Total metric time (ms):", damage_timed.elapsed + void_timed.elapsed)
 
-    #print("Total metric time (ms):", collision_timed.elapsed + void_timed.elapsed)
-
+    """
     for p in points:
         crosshair(frame, p, size = 8, color = (0,0,0))
+    """
 
     # Show annotated frame
     cv2.imshow("Frame", frame)
@@ -290,6 +303,7 @@ while True:
 # Tidy up - close windows and stop video stream object
 cv2.destroyAllWindows()
 vs.stop()
+
 
 """
 # Can boxplot a range of frames to see distribution in population quantities
