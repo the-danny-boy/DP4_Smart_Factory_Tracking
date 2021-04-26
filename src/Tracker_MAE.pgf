@@ -3242,7 +3242,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=2.2in,y=6.373333in,left,base]{\color{textcolor}\rmfamily\fontsize{28.000000}{28.000000}\selectfont SORT}%
+\pgftext[x=2.2in,y=6.373333in,left,base]{\color{textcolor}\rmfamily\fontsize{30.000000}{33.000000}\selectfont SORT}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
@@ -3275,7 +3275,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=2.2in,y=5.806120in,left,base]{\color{textcolor}\rmfamily\fontsize{28.000000}{28.000000}\selectfont Centroid}%
+\pgftext[x=2.2in,y=5.806120in,left,base]{\color{textcolor}\rmfamily\fontsize{30.000000}{33.000000}\selectfont Centroid}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
@@ -3312,7 +3312,7 @@
 \pgfsetfillcolor{textcolor}%
 
 %Text - resized (28), shifted left
-\pgftext[x=2.2in,y=5.238906in,left,base]{\color{textcolor}\rmfamily\fontsize{28.000000}{28.000000}\selectfont Centroid\_KF}%
+\pgftext[x=2.2in,y=5.238906in,left,base]{\color{textcolor}\rmfamily\fontsize{30.000000}{33.000000}\selectfont Centroid\_KF}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
@@ -3345,7 +3345,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=2.2in,y=4.671693in,left,base]{\color{textcolor}\rmfamily\fontsize{28.000000}{28.000000}\selectfont IoU}%
+\pgftext[x=2.2in,y=4.671693in,left,base]{\color{textcolor}\rmfamily\fontsize{30.000000}{33.000000}\selectfont IoU}%
 \end{pgfscope}%
 \end{pgfpicture}%
 \makeatother%

@@ -23,7 +23,7 @@ from itertools import combinations, compress
 
 # Benchmark settings
 early_terminate = 200
-repeat_attempts = 3
+repeat_attempts = 5 #3
 
 # Environment Support Geometry
 raw_pts = np.asarray([[0,212], [260,487], [404, 486], [400, 327], [410, 328], [959, 147], [959, 538], [0, 537], [0,212]])
@@ -369,6 +369,8 @@ matplotlib.rcParams.update({
     'text.usetex': True,
     'pgf.rcfonts': False,
 })
+
+plt.rcParams.update({'font.size': 13})
 
 fig,ax = plt.subplots()
 ax.set_ylabel("Frame Time (ms)")

@@ -197,6 +197,7 @@ matplotlib.rcParams.update({
     'pgf.rcfonts': False,
 })
 
+plt.rcParams.update({'font.size': 13})
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
