@@ -22,7 +22,7 @@ from utility_functions import crosshair, heron, regularity
 from itertools import combinations, compress
 
 # Benchmark settings
-early_terminate = 200
+early_terminate = False #200
 repeat_attempts = 5 #3
 
 # Environment Support Geometry
