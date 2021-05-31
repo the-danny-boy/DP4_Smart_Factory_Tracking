@@ -1,0 +1,64 @@
+This is BibTeX, Version 0.99d (TeX Live 2019/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+The style file: unsrtnat.bst
+Database file #1: ./ref.bib
+Warning--empty year in john_erdner_2019
+Warning--empty author in bsi-capa
+Warning--empty year in crux
+Warning--empty author in deloitte-sensor
+Warning--empty year in smartskin
+Warning--empty year in roboflow
+Warning--empty year in mturk
+Warning--empty year in clara
+Warning--empty year in drive
+Warning--empty year in isaac
+Warning--empty year in ubuntu
+Warning--empty year in python
+Warning--empty year in opencv
+Warning--empty year in numpy
+Warning--empty year in unity
+Warning--empty year in physx
+Warning--there's a number but no volume in canny1986computational
+You've used 65 entries,
+            2481 wiz_defined-function locations,
+            894 strings with 15350 characters,
+and the built_in function-call counts, 24473 in all, are:
+= -- 2213
+> -- 962
+< -- 48
++ -- 411
+- -- 280
+* -- 1705
+:= -- 3493
+add.period$ -- 219
+call.type$ -- 65
+change.case$ -- 131
+chr.to.int$ -- 64
+cite$ -- 99
+duplicate$ -- 1313
+empty$ -- 2450
+format.name$ -- 356
+if$ -- 5484
+int.to.chr$ -- 2
+int.to.str$ -- 66
+missing$ -- 40
+newline$ -- 343
+num.names$ -- 144
+pop$ -- 715
+preamble$ -- 1
+purify$ -- 65
+quote$ -- 0
+skip$ -- 869
+stack$ -- 0
+substring$ -- 1102
+swap$ -- 309
+text.length$ -- 23
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 452
+warning$ -- 17
+while$ -- 181
+width$ -- 0
+write$ -- 851
+(There were 17 warnings)

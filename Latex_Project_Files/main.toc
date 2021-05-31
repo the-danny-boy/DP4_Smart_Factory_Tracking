@@ -1,0 +1,40 @@
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Project Background}{1}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Group Project Aim}{1}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Project Objectives}{3}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Literature Review}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Current State of the Industry}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Methodology Scoping}{5}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Approach to Implementation}{7}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Research Methodology}{8}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Methodology Overview}{8}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Selection of Modelling Tools}{8}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Data Generation}{8}{subsection.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.1}Rendering Environment}{9}{subsubsection.3.3.1}%
+\contentsline {paragraph}{\numberline {3.3.1.1}Vial Geometry Creation}{9}{paragraph.3.3.1.1}%
+\contentsline {paragraph}{\numberline {3.3.1.2}Visual Appearance Curation}{10}{paragraph.3.3.1.2}%
+\contentsline {paragraph}{\numberline {3.3.1.3}Spawn Algorithm Design}{11}{paragraph.3.3.1.3}%
+\contentsline {paragraph}{\numberline {3.3.1.4}Output Generation}{11}{paragraph.3.3.1.4}%
+\contentsline {subsubsection}{\numberline {3.3.2}Simulation Environment}{13}{subsubsection.3.3.2}%
+\contentsline {paragraph}{\numberline {3.3.2.1}Physics Setup}{13}{paragraph.3.3.2.1}%
+\contentsline {paragraph}{\numberline {3.3.2.2}Spawn Algorithm Design}{14}{paragraph.3.3.2.2}%
+\contentsline {paragraph}{\numberline {3.3.2.3}Output Generation}{15}{paragraph.3.3.2.3}%
+\contentsline {subsection}{\numberline {3.4}Detection}{15}{subsection.3.4}%
+\contentsline {subsubsection}{\numberline {3.4.1}Colour (HSV) Detection}{16}{subsubsection.3.4.1}%
+\contentsline {subsubsection}{\numberline {3.4.2}Hough Circle Detection}{16}{subsubsection.3.4.2}%
+\contentsline {subsubsection}{\numberline {3.4.3}Template Matching}{16}{subsubsection.3.4.3}%
+\contentsline {subsubsection}{\numberline {3.4.4}Scaled-YOLOv4}{17}{subsubsection.3.4.4}%
+\contentsline {subsection}{\numberline {3.5}Tracking}{17}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Line Health Analysis}{18}{subsection.3.6}%
+\contentsline {subsubsection}{\numberline {3.6.1}Damage Assessment Procedure}{18}{subsubsection.3.6.1}%
+\contentsline {subsubsection}{\numberline {3.6.2}Toppling Risk Assessment Procedure}{20}{subsubsection.3.6.2}%
+\contentsline {section}{\numberline {4}Results and Discussion}{22}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Detector Performance}{22}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Tracker Performance}{24}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Evaluation of Health Assessment Procedures}{26}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Damage Assessment Procedure Evaluation}{27}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Toppling Risk Assessment Procedure Evaluation}{28}{subsubsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.4}Combined System Performance Evaluation}{28}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Conclusions}{30}{section.5}%
+\contentsline {section}{\numberline {6}Recommendations for Further Work}{30}{section.6}%
+\contentsline {section}{Bibliography}{31}{section*.40}%

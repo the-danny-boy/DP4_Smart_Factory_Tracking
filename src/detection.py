@@ -69,7 +69,7 @@ def connectedFiltering(frame, mask, debug = False):
         (centroid_x, centroid_y) = centroids[i]
 
         # Perform selection of connection components based on area
-        if area > 10 and area < 1500:
+        if area > 100 and area < 1500:
 
             # Add bounding box to list
             bboxes.append((x, y, x + w, y + h, PROB_PLACEHOLDER, CLASS_PLACEHOLDER))

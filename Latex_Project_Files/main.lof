@@ -1,0 +1,34 @@
+\vskip 0.4cm
+\contentsline {figure}{\numberline {1}{\ignorespaces System diagram of group project components\relax }}{2}{figure.caption.7}%
+\contentsline {figure}{\numberline {2}{\ignorespaces Diagrammatic overview of research methodology\relax }}{8}{figure.caption.8}%
+\contentsline {figure}{\numberline {3}{\ignorespaces 3D model of vial created in Blender\relax }}{9}{figure.caption.9}%
+\contentsline {figure}{\numberline {4}{\ignorespaces Psuedo-glass vial within Unity engine\relax }}{10}{figure.caption.10}%
+\contentsline {subfigure}{\numberline {a}{\ignorespaces \centering Perspective view \caption@gobble {fig:vial_appearance_perspective}\caption@thelabel \relax }}{10}{figure.caption.11}%
+\contentsline {subfigure}{\numberline {b}{\ignorespaces \centering Top-down view \caption@gobble {fig:vial_appearance_top}\caption@thelabel \relax }}{10}{figure.caption.12}%
+\contentsline {figure}{\numberline {5}{\ignorespaces Parametric packing algorithm overview\relax }}{11}{figure.caption.13}%
+\contentsline {figure}{\numberline {6}{\ignorespaces Render environment outputs\relax }}{12}{figure.caption.14}%
+\contentsline {subfigure}{\numberline {a}{\ignorespaces 5 objects}}{12}{figure.caption.15}%
+\contentsline {subfigure}{\numberline {b}{\ignorespaces \centering 50 objects \caption@gobble {fig:render_50}\caption@thelabel \relax }}{12}{figure.caption.16}%
+\contentsline {subfigure}{\numberline {c}{\ignorespaces \centering 500 objects \caption@gobble {fig:render_500}\caption@thelabel \relax }}{12}{figure.caption.17}%
+\contentsline {subfigure}{\numberline {d}{\ignorespaces \centering 500 objects (bounding box overlay visualised) \caption@gobble {fig:render_500_img}\caption@thelabel \relax }}{12}{figure.caption.18}%
+\contentsline {subfigure}{\numberline {e}{\ignorespaces \centering 500 objects (bounding box data excerpt) \caption@gobble {fig:render_500_txt}\caption@thelabel \relax }}{12}{figure.caption.19}%
+\contentsline {figure}{\numberline {7}{\ignorespaces Simulation environment\relax }}{13}{figure.caption.20}%
+\contentsline {figure}{\numberline {8}{\ignorespaces Poisson disk sampling algorithm overview\relax }}{14}{figure.caption.21}%
+\contentsline {figure}{\numberline {9}{\ignorespaces Simulation environment outputs\relax }}{15}{figure.caption.22}%
+\contentsline {subfigure}{\numberline {a}{\ignorespaces \centering Simulation footage (frame excerpt) \caption@gobble {fig:simulation_frame}\caption@thelabel \relax }}{15}{figure.caption.23}%
+\contentsline {subfigure}{\numberline {b}{\ignorespaces \centering Object count \caption@gobble {fig:simulation_count}\caption@thelabel \relax }}{15}{figure.caption.24}%
+\contentsline {figure}{\numberline {10}{\ignorespaces Template matching images\relax }}{17}{figure.caption.25}%
+\contentsline {subfigure}{\numberline {a}{\ignorespaces \centering Raw template\caption@thelabel \relax }}{17}{figure.caption.26}%
+\contentsline {subfigure}{\numberline {b}{\ignorespaces \centering Averaged template\caption@thelabel \relax }}{17}{figure.caption.27}%
+\contentsline {figure}{\numberline {11}{\ignorespaces Diagrammatic overview of toppling risk assessment procedure\relax }}{21}{figure.caption.28}%
+\contentsline {figure}{\numberline {12}{\ignorespaces Detector accuracy and speed for increasing object count\relax }}{23}{figure.caption.29}%
+\contentsline {figure}{\numberline {13}{\ignorespaces Performance comparison of different trackers throughout the benchmark\relax }}{25}{figure.caption.30}%
+\contentsline {subfigure}{\numberline {a}{\ignorespaces \centering Frame time for different trackers \caption@gobble {fig:Frametime_Tracker}\caption@thelabel \relax }}{25}{figure.caption.31}%
+\contentsline {subfigure}{\numberline {b}{\ignorespaces \centering MAE tracker count for different trackers \caption@gobble {fig:MAE_Tracker}\caption@thelabel \relax }}{25}{figure.caption.32}%
+\contentsline {figure}{\numberline {14}{\ignorespaces Damage assessment procedure (individual contributions)\relax }}{27}{figure.caption.33}%
+\contentsline {subfigure}{\numberline {a}{\ignorespaces \centering Cumulative damage contribution visualisation \caption@gobble {fig:analysis_damage_cumulative}\caption@thelabel \relax }}{27}{figure.caption.34}%
+\contentsline {subfigure}{\numberline {b}{\ignorespaces \centering Collision damage contribution visualisation \caption@gobble {fig:analysis_damage_collision}\caption@thelabel \relax }}{27}{figure.caption.35}%
+\contentsline {figure}{\numberline {15}{\ignorespaces Toppling risk assessment procedure outputs\relax }}{28}{figure.caption.36}%
+\contentsline {subfigure}{\numberline {a}{\ignorespaces \centering Toppling risk assessment density map \caption@gobble {fig:analysis_toppling_image}\caption@thelabel \relax }}{28}{figure.caption.37}%
+\contentsline {subfigure}{\numberline {b}{\ignorespaces \centering Textual summary of toppling risk assessment \caption@gobble {fig:analysis_toppling_summary}\caption@thelabel \relax }}{28}{figure.caption.38}%
+\contentsline {figure}{\numberline {16}{\ignorespaces Performance profile for image processing pipeline\relax }}{29}{figure.caption.39}%

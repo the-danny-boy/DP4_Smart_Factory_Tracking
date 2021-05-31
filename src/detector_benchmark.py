@@ -25,6 +25,10 @@ output_root_directory = r"../Data_Generator/Data_Generator_Outputs/"
 image_count_variants = [os.path.join(output_root_directory, dir_item, "test", "images")+"/" for dir_item in os.listdir(output_root_directory)]
 label_count_variants = [os.path.join(output_root_directory, dir_item, "test", "labels")+"/" for dir_item in os.listdir(output_root_directory)]
 
+"""#Test on only 5s
+image_count_variants = [[os.path.join(output_root_directory, dir_item, "test", "images")+"/" for dir_item in os.listdir(output_root_directory)][-3]]
+label_count_variants = [[os.path.join(output_root_directory, dir_item, "test", "labels")+"/" for dir_item in os.listdir(output_root_directory)][-3]]"""
+
 # Define detector(s)
 hough = partial(houghDetect, dp = 1.5, minDist = 20, 
                         param1 = 27, param2 = 19, 
@@ -61,7 +65,8 @@ for image_paths, label_paths in zip(image_count_variants, label_count_variants):
     detection_times = []
 
     # Set the IoU threshold for TP detection
-    iou_thresh = 0.4
+    #iou_thresh = 0.4
+    iou_thresh = 0.1
 
     # Iterate through detection functions
     for detector_func in detector_funcs:
@@ -101,6 +106,7 @@ for image_paths, label_paths in zip(image_count_variants, label_count_variants):
                     x1, x2 = int(x - w/2), int(x + w/2)
                     y1, y2 = int(y - h/2), int(y + h/2)
                     gt_bboxes[index].append((x1,y1,x2,y2))
+                    
             
             # Increment total number of GT detections => this is TP + FN
             total_positives += len(gt_bboxes[index])
@@ -116,6 +122,9 @@ for image_paths, label_paths in zip(image_count_variants, label_count_variants):
                 _image = index
                 _bbox = (x1,y1,x2,y2)
                 _conf = conf
+                
+                #Check bbox size => small hsv causing large error... (not an issue for centroid)
+                #print(x2-x1, y2-y1, 30, 30)
 
                 # Iterate through all gt_bboxes, calculating IoU to identify if TP/FP
                 flag = True
@@ -189,6 +198,7 @@ import matplotlib.transforms as transforms
 
 # For pgf output for Latex
 import matplotlib
+
 matplotlib.use("pgf")
 matplotlib.rcParams.update({
     "pgf.texsystem": "pdflatex",
@@ -197,7 +207,8 @@ matplotlib.rcParams.update({
     'pgf.rcfonts': False,
 })
 
-plt.rcParams.update({'font.size': 13})
+
+plt.rcParams.update({'font.size': 16})
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -238,7 +249,7 @@ legend_additions = [Line2D([0], [0], marker='o', color='w', label='5 objects',
          Line2D([0], [0], marker='v', color='w', label='500 objects',
                           markeredgecolor='gray', markersize=6, fillstyle="none")]
 handles.extend(legend_additions) 
-ax.legend(handles=handles)
+ax.legend(handles=handles, loc="lower right")
 
 # Resize and show plot
 ax.set_ylim([0, 1])

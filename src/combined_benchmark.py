@@ -383,7 +383,7 @@ ax.set_xlim(0,len(total_times_avg)-2)
 t = np.arange(0, len(total_times_avg))
 
 
-labels = ["Acquisition", "Detection", "Tracking", "Damage", "Voids"]
+labels = ["Acquisition", "Detection", "Tracking", "Damage", "Toppling"]
 
 # Show a stacked plot for the other variables on top
 ax.stackplot(t, acquisition_times_avg, detection_times_avg, tracker_times_avg, damage_times_avg, void_times_avg,

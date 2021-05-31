@@ -1,0 +1,7 @@
+Adjusted font size, marker location and text position
+\fontsize{30.000000}{36.000000} => \fontsize{30.000000}{33.000000}
+
+\pgftext[x=2.666667in, => \pgftext[x=2.2in,
+\pgfsys@transformshift{1.916667in} => \pgfsys@transformshift{1.8in}
+
+\pgfsys@transformshift{6.147000in}{5.130400in} => 	\pgfsys@transformshift{6.147000in}{5.573920in}

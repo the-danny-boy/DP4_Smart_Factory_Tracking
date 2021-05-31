@@ -143,3 +143,6 @@ src/ScaledYOLOv4/vials/*/*/*
 src/ScaledYOLOv4/runs/*/weights/*
 #!src/ScaledYOLOv4/runs/*/weights/best_*_strip.pt
 #Ignore all checkpoints, as too large
+
+# Ignore signature in latex project files
+Latex_Project_Files/images/Signature.png

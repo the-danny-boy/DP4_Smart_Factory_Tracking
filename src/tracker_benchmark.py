@@ -125,8 +125,8 @@ for idx, _tracker in enumerate(trackers.values()):
             final_id = tracker_ids[-1] if bool(tracker_ids) else 0
             actual_id = gt_instance_count[frame_no]
 
-            # Append attempt data to list
-            _trackers_list[attempt_no].append(int(final_id))
+            # Append attempt data to list (MAE)
+            _trackers_list[attempt_no].append( abs(int(final_id) - actual_id) )
             _timers_list[attempt_no].append(tracker_timed.elapsed)
             _object_count[attempt_no].append(actual_id)
             

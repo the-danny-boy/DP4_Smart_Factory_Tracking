@@ -1,0 +1,429 @@
+\begin{thebibliography}{65}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Blamont and Burger(2020)]{ludwig_burger_2020}
+M~Blamont and L~Burger.
+\newblock Exclusive: Bottlenecks? glass vial makers prepare for covid-19
+  vaccine, 2020.
+\newblock URL
+  \url{https://www.reuters.com/article/us-health-coronavirus-schott-exclusive-idUSKBN23J0SN}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[joh()]{john_erdner_2019}
+Advances in vial processing in pharmaceutical primary packaging to reduce risk
+  of vial damage and particle contamination - pharmaceutical processing world.
+\newblock URL
+  \url{https://www.pharmaceuticalprocessingworld.com/advances-in-vial-processing-in-pharmaceutical-primary-packaging-to-reduce-risk-of-vial-damage-and-particle-contamination/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Shaw and Lyall(1985)]{shaw_lyall_1985}
+NJ~Shaw and EG~Lyall.
+\newblock Hazards of glass ampoules.
+\newblock \emph{BMJ}, 291\penalty0 (6506):\penalty0 1390--1390, 1985.
+\newblock \doi{10.1136/bmj.291.6506.1390}.
+
+\bibitem[Karlén(2020)]{9029267}
+S~Karlén.
+\newblock Reduce machine stops to limit human intervention in aseptic
+  production, 2020.
+\newblock URL
+  \url{https://lup.lub.lu.se/student-papers/search/publication/9029267}.
+\newblock Student Paper.
+
+\bibitem[cap(2014)]{capa_2014}
+Corrective and preventive actions (capa), 2014.
+\newblock URL \url{https://www.fda.gov/corrective-and-preventive-actions-capa}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[bsi(2013)]{bsi-capa}
+Corrective and preventive action: The closed-loop system.
+\newblock Technical Report 9.23.13, The British Standards Institution., 2013.
+\newblock URL
+  \url{https://www.bsigroup.com/LocalFiles/en-US/Whitepapers/Quality%20Management/bsi-whitepaper-capa-closed-loop-system.pdf}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Miller(2018)]{miller_2018}
+K~Miller.
+\newblock The impact of industry 4.0 on quality management systems, 2018.
+\newblock URL
+  \url{https://www.pilgrimquality.com/blog/smart-quality-management-impact-industry/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[cru()]{crux}
+Crux product design.
+\newblock URL \url{http://www.cruxproductdesign.com/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[del(2015)]{deloitte-sensor}
+Industry 4.0: Challenges and solutions for the digital transformation and use
+  of exponential technologies.
+\newblock Technical report, Deloitte., 2015.
+\newblock URL
+  \url{https://www2.deloitte.com/content/dam/Deloitte/ch/Documents/manufacturing/ch-en-manufacturing-industry-4-0-24102014.pdf}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Knutson(2008)]{photoelectric}
+G~Knutson.
+\newblock Plant engineering | using photoelectric sensors on the production
+  line, 2008.
+\newblock URL
+  \url{https://www.plantengineering.com/articles/using-photoelectric-sensors-on-the-production-line/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Staff(2005)]{rfid}
+Control~Engineering Staff.
+\newblock Control engineering | rfid on the production line, 2005.
+\newblock URL
+  \url{https://www.controleng.com/articles/rfid-on-the-production-line/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Brusey and McFarlane(2009)]{brusey2009effective}
+J~Brusey and DC~McFarlane.
+\newblock Effective rfid-based object tracking for manufacturing.
+\newblock \emph{International Journal of Computer Integrated Manufacturing},
+  22\penalty0 (7):\penalty0 638--647, 2009.
+
+\bibitem[sma()]{smartskin}
+Reduce glass breakage, bruising, microfractures with schott \& smartskin |
+  schott ag.
+\newblock URL
+  \url{https://www.schott.com/pharma_consulting/english/smartskin/index.html?WTC=EN_Pharma-Consulting_Smartskin_First}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Ciora and Simion(2014)]{radu2014image}
+R~Ciora and C~Simion.
+\newblock Industrial applications of image processing.
+\newblock \emph{ACTA Universitatis Cibiniensis}, 64, 12 2014.
+\newblock \doi{10.2478/aucts-2014-0004}.
+
+\bibitem[Cabral and de~Ara{\'u}jo(2015)]{cabral2015intelligent}
+JDD Cabral and SA~de~Ara{\'u}jo.
+\newblock An intelligent vision system for detecting defects in glass products
+  for packaging and domestic use.
+\newblock \emph{The International Journal of Advanced Manufacturing
+  Technology}, 77\penalty0 (1-4):\penalty0 485--494, 2015.
+
+\bibitem[O’Mahony et~al.(2019)O’Mahony, Campbell, Carvalho, Harapanahalli,
+  Hernandez, Krpalkova, Riordan, and Walsh]{o2019deep}
+N~O’Mahony, S~Campbell, A~Carvalho, S~Harapanahalli, GV~Hernandez,
+  L~Krpalkova, D~Riordan, and J~Walsh.
+\newblock Deep learning vs. traditional computer vision.
+\newblock In \emph{Science and Information Conference}, pages 128--144.
+  Springer, 2019.
+
+\bibitem[Lien and Zhao(2018)]{lien2018product}
+PC~Lien and Q~Zhao.
+\newblock Product surface defect detection based on deep learning.
+\newblock In \emph{2018 IEEE 16th Intl Conf on Dependable, Autonomic and Secure
+  Computing, 16th Intl Conf on Pervasive Intelligence and Computing, 4th Intl
+  Conf on Big Data Intelligence and Computing and Cyber Science and Technology
+  Congress (DASC/PiCom/DataCom/CyberSciTech)}, pages 250--255. IEEE, 2018.
+
+\bibitem[rob()]{roboflow}
+Roboflow: Everything you need to start building computer vision into your
+  applications.
+\newblock URL \url{https://roboflow.com/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[mtu()]{mturk}
+Amazon mechanical turk.
+\newblock URL \url{https://www.mturk.com/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Lardinois(2021)]{roboflow_news}
+F~Lardinois.
+\newblock Roboflow raises \$2.1m for its end-to-end computer vision platform |
+  techcrunch, 2021.
+\newblock URL
+  \url{https://techcrunch.com/2021/01/12/roboflow-raises-2-1m-for-its-end-to-end-computer-vision-platform/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Liu et~al.(2013)Liu, Chen, and Kubota]{liu2013intelligent}
+H~Liu, S~Chen, and N~Kubota.
+\newblock Intelligent video systems and analytics: A survey.
+\newblock \emph{IEEE Transactions on Industrial Informatics}, 9\penalty0
+  (3):\penalty0 1222--1233, 2013.
+
+\bibitem[Neale et~al.(2011)Neale, Hessel, and
+  Terpstra]{neale2011photogrammetric}
+WT~Neale, D~Hessel, and T~Terpstra.
+\newblock Photogrammetric measurement error associated with lens distortion.
+\newblock Technical report, SAE Technical Paper, 2011.
+
+\bibitem[Hanbury(2008)]{hanbury2008survey}
+A~Hanbury.
+\newblock A survey of methods for image annotation.
+\newblock \emph{Journal of Visual Languages \& Computing}, 19\penalty0
+  (5):\penalty0 617--627, 2008.
+
+\bibitem[Shorten and Khoshgoftaar(2019)]{shorten2019survey}
+C~Shorten and TM~Khoshgoftaar.
+\newblock A survey on image data augmentation for deep learning.
+\newblock \emph{Journal of Big Data}, 6\penalty0 (1):\penalty0 1--48, 2019.
+
+\bibitem[Sieczka and Pa{\'n}czyk(2020)]{sieczka2020blender}
+R~Sieczka and M~Pa{\'n}czyk.
+\newblock Blender as a tool for generating synthetic data.
+\newblock \emph{Journal of Computer Sciences Institute}, 16:\penalty0 227--232,
+  2020.
+
+\bibitem[Tremblay et~al.(2018)Tremblay, Prakash, Acuna, Brophy, Jampani, Anil,
+  To, Cameracci, Boochoon, and Birchfield]{tremblay2018training}
+J~Tremblay, A~Prakash, D~Acuna, M~Brophy, V~Jampani, C~Anil, T~To, E~Cameracci,
+  S~Boochoon, and S~Birchfield.
+\newblock Training deep networks with synthetic data: Bridging the reality gap
+  by domain randomization.
+\newblock In \emph{Proceedings of the IEEE Conference on Computer Vision and
+  Pattern Recognition Workshops}, pages 969--977, 2018.
+
+\bibitem[Wang et~al.(2021{\natexlab{a}})Wang, Gao, Lin, and
+  Yuan]{wang2021pixel}
+Q~Wang, J~Gao, W~Lin, and Y~Yuan.
+\newblock Pixel-wise crowd understanding via synthetic data.
+\newblock \emph{International Journal of Computer Vision}, 129\penalty0
+  (1):\penalty0 225--245, 2021{\natexlab{a}}.
+
+\bibitem[Qiu and Yuille(2016)]{qiu2016unrealcv}
+W~Qiu and A~Yuille.
+\newblock Unrealcv: Connecting computer vision to unreal engine.
+\newblock In \emph{European Conference on Computer Vision}, pages 909--916.
+  Springer, 2016.
+
+\bibitem[Wang et~al.(2019)Wang, Gao, Lin, and Yuan]{wang2019learning}
+Q~Wang, J~Gao, W~Lin, and Y~Yuan.
+\newblock Learning from synthetic data for crowd counting in the wild.
+\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision
+  and Pattern Recognition}, pages 8198--8207, 2019.
+
+\bibitem[cla()]{clara}
+Nvidia clara | nvidia developer.
+\newblock URL \url{https://developer.nvidia.com/clara}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[dri()]{drive}
+Nvidia drive - autonomous vehicle development platforms | nvidia developer.
+\newblock URL \url{https://developer.nvidia.com/drive}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[isa()]{isaac}
+Nvidia isaac sim | nvidia developer.
+\newblock URL \url{https://developer.nvidia.com/isaac-sim}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Hamuda et~al.(2017)Hamuda, Mc~Ginley, Glavin, and
+  Jones]{hamuda2017automatic}
+E~Hamuda, B~Mc~Ginley, M~Glavin, and E~Jones.
+\newblock Automatic crop detection under field conditions using the hsv colour
+  space and morphological operations.
+\newblock \emph{Computers and electronics in agriculture}, 133:\penalty0
+  97--107, 2017.
+
+\bibitem[Leavers(1992)]{leavers1992shape}
+VF~Leavers.
+\newblock \emph{Shape detection in computer vision using the Hough transform},
+  volume~1.
+\newblock Springer, 1992.
+
+\bibitem[Briechle and Hanebeck(2001)]{briechle2001template}
+K~Briechle and UD~Hanebeck.
+\newblock Template matching using fast normalized cross correlation.
+\newblock In \emph{Optical Pattern Recognition XII}, volume 4387, pages
+  95--102. International Society for Optics and Photonics, 2001.
+
+\bibitem[Ren et~al.(2015)Ren, He, Girshick, and Sun]{ren2015faster}
+S~Ren, K~He, R~Girshick, and J~Sun.
+\newblock Faster r-cnn: Towards real-time object detection with region proposal
+  networks.
+\newblock \emph{arXiv preprint arXiv:1506.01497}, 2015.
+
+\bibitem[Redmon et~al.(2016)Redmon, Divvala, Girshick, and
+  Farhadi]{redmon2016you}
+J~Redmon, S~Divvala, R~Girshick, and A~Farhadi.
+\newblock You only look once: Unified, real-time object detection.
+\newblock In \emph{Proceedings of the IEEE conference on computer vision and
+  pattern recognition}, pages 779--788, 2016.
+
+\bibitem[Wang et~al.(2021{\natexlab{b}})Wang, Bochkovskiy, and
+  Liao]{wang2021scaledyolov4}
+C~Wang, A~Bochkovskiy, and HM~Liao.
+\newblock Scaled-yolov4: Scaling cross stage partial network,
+  2021{\natexlab{b}}.
+
+\bibitem[Pavlakos et~al.(2017)Pavlakos, Zhou, Chan, Derpanis, and
+  Daniilidis]{pavlakos20176}
+G~Pavlakos, X~Zhou, A~Chan, KG~Derpanis, and K~Daniilidis.
+\newblock 6-dof object pose from semantic keypoints.
+\newblock In \emph{2017 IEEE international conference on robotics and
+  automation (ICRA)}, pages 2011--2018. IEEE, 2017.
+
+\bibitem[Lai and Fuh(2015)]{lai2015transparent}
+P~Lai and C~Fuh.
+\newblock Transparent object detection using regions with convolutional neural
+  network.
+\newblock In \emph{IPPR Conference on Computer Vision, Graphics, and Image
+  Processing}, volume~2, 2015.
+
+\bibitem[Khaing and Masayuki(2018)]{khaing2018transparent}
+MP~Khaing and M~Masayuki.
+\newblock Transparent object detection using convolutional neural network.
+\newblock In \emph{International Conference on Big Data Analysis and Deep
+  Learning Applications}, pages 86--93. Springer, 2018.
+
+\bibitem[Bewley et~al.(2016)Bewley, Ge, Ott, Ramos, and
+  Upcroft]{bewley2016simple}
+A~Bewley, Z~Ge, L~Ott, F~Ramos, and B~Upcroft.
+\newblock Simple online and realtime tracking.
+\newblock In \emph{2016 IEEE international conference on image processing
+  (ICIP)}, pages 3464--3468. IEEE, 2016.
+
+\bibitem[Bochinski et~al.(2017)Bochinski, Eiselein, and
+  Sikora]{bochinski2017high}
+E~Bochinski, V~Eiselein, and T~Sikora.
+\newblock High-speed tracking-by-detection without using image information.
+\newblock In \emph{2017 14th IEEE International Conference on Advanced Video
+  and Signal Based Surveillance (AVSS)}, pages 1--6. IEEE, 2017.
+
+\bibitem[Nascimento et~al.(1999)Nascimento, Abrantes, and
+  Marques]{nascimento1999algorithm}
+JC~Nascimento, AJ~Abrantes, and JS~Marques.
+\newblock An algorithm for centroid-based tracking of moving objects.
+\newblock In \emph{1999 IEEE International Conference on Acoustics, Speech, and
+  Signal Processing. Proceedings. ICASSP99}, volume~6, pages 3305--3308. IEEE
+  Computer Society, 1999.
+
+\bibitem[Wojke et~al.(2017)Wojke, Bewley, and Paulus]{wojke2017simple}
+N~Wojke, A~Bewley, and D~Paulus.
+\newblock Simple online and realtime tracking with a deep association metric.
+\newblock In \emph{2017 IEEE international conference on image processing
+  (ICIP)}, pages 3645--3649. IEEE, 2017.
+
+\bibitem[Sun et~al.(2020)Sun, Akhtar, Song, Song, Mian, and
+  Shah]{sun2020simultaneous}
+S~Sun, N~Akhtar, X~Song, H~Song, A~Mian, and M~Shah.
+\newblock Simultaneous detection and tracking with motion modelling for
+  multiple object tracking.
+\newblock In \emph{European Conference on Computer Vision}, pages 626--643.
+  Springer, 2020.
+
+\bibitem[Schaut et~al.(2017)Schaut, Hoff, Demartino, Denson, and
+  Verkleeren]{schaut2017enhancing}
+RA~Schaut, KC~Hoff, SE~Demartino, WK~Denson, and RL~Verkleeren.
+\newblock Enhancing patient safety through the use of a pharmaceutical glass
+  designed to prevent cracked containers.
+\newblock \emph{PDA journal of pharmaceutical science and technology},
+  71\penalty0 (6):\penalty0 511--528, 2017.
+
+\bibitem[Veeraraghavan et~al.(2003)Veeraraghavan, Masoud, and
+  Papanikolopoulos]{veeraraghavan2003computer}
+H~Veeraraghavan, O~Masoud, and NP~Papanikolopoulos.
+\newblock Computer vision algorithms for intersection monitoring.
+\newblock \emph{IEEE Transactions on Intelligent Transportation Systems},
+  4\penalty0 (2):\penalty0 78--89, 2003.
+
+\bibitem[Lai et~al.(2011)Lai, Mejias, and Ford]{lai2011airborne}
+J~Lai, L~Mejias, and JJ~Ford.
+\newblock Airborne vision-based collision-detection system.
+\newblock \emph{Journal of Field Robotics}, 28\penalty0 (2):\penalty0 137--157,
+  2011.
+
+\bibitem[Speleers and Ebner(2019)]{speleers2019acceleration}
+P~Speleers and M~Ebner.
+\newblock Acceleration based collision detection with a mobile robot.
+\newblock In \emph{2019 Third IEEE International Conference on Robotic
+  Computing (IRC)}, pages 437--438. IEEE, 2019.
+
+\bibitem[Rougier et~al.(2007)Rougier, Meunier, St-Arnaud, and
+  Rousseau]{rougier2007fall}
+C~Rougier, J~Meunier, A~St-Arnaud, and J~Rousseau.
+\newblock Fall detection from human shape and motion history using video
+  surveillance.
+\newblock In \emph{21st International Conference on Advanced Information
+  Networking and Applications Workshops (AINAW'07)}, volume~2, pages 875--880.
+  IEEE, 2007.
+
+\bibitem[Velastin et~al.(1994)Velastin, Yin, Davies, Vicencio-Silva, Allsop,
+  and Penn]{velastin1994automated}
+SA~Velastin, JH~Yin, AC~Davies, MA~Vicencio-Silva, RE~Allsop, and A~Penn.
+\newblock Automated measurement of crowd density and motion using image
+  processing.
+\newblock In \emph{Seventh International Conference on Road Traffic Monitoring
+  and Control, 1994.}, pages 127--132. IET, 1994.
+
+\bibitem[Abbas et~al.(2013)Abbas, Tayyab, and Qadri]{abbas2013real}
+N~Abbas, M~Tayyab, and MT~Qadri.
+\newblock Real time traffic density count using image processing.
+\newblock \emph{International Journal of Computer Applications}, 83\penalty0
+  (9):\penalty0 16--19, 2013.
+
+\bibitem[Duyckaerts and Godefroy(2000)]{duyckaerts2000voronoi}
+C~Duyckaerts and G~Godefroy.
+\newblock Voronoi tessellation to study the numerical density and the spatial
+  distribution of neurones.
+\newblock \emph{Journal of chemical neuroanatomy}, 20\penalty0 (1):\penalty0
+  83--92, 2000.
+
+\bibitem[ubu()]{ubuntu}
+Enterprise open source and linux | ubuntu.
+\newblock URL \url{https://ubuntu.com/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[pyt()]{python}
+Welcome to python.org.
+\newblock URL \url{https://www.python.org/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[ope()]{opencv}
+Opencv.
+\newblock URL \url{https://opencv.org/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[num()]{numpy}
+Numpy.
+\newblock URL \url{https://numpy.org/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[uni()]{unity}
+Unity real-time development platform | 3d, 2d vr \& ar engine.
+\newblock URL \url{https://unity.com/}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Vitter(1985)]{vitter1985random}
+JS~Vitter.
+\newblock Random sampling with a reservoir.
+\newblock \emph{ACM Transactions on Mathematical Software (TOMS)}, 11\penalty0
+  (1):\penalty0 37--57, 1985.
+
+\bibitem[phy()]{physx}
+Gameworks physx overview | nvidia developer.
+\newblock URL \url{https://developer.nvidia.com/gameworks-physx-overview}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Bridson(2007)]{bridson2007fast}
+R~Bridson.
+\newblock Fast poisson disk sampling in arbitrary dimensions.
+\newblock \emph{SIGGRAPH sketches}, 10:\penalty0 1, 2007.
+
+\bibitem[Canny(1986)]{canny1986computational}
+J~Canny.
+\newblock A computational approach to edge detection.
+\newblock \emph{IEEE Transactions on pattern analysis and machine
+  intelligence}, \penalty0 (6):\penalty0 679--698, 1986.
+
+\bibitem[Deshpande(2020)]{multiobjtracker_amd2018}
+AM~Deshpande.
+\newblock Multi-object trackers in python, 2020.
+\newblock URL \url{https://github.com/adipandas/multi-object-tracker}.
+\newblock [Accessed 28th April 2021].
+
+\bibitem[Everingham et~al.(2010)Everingham, Van~Gool, Williams, Winn, and
+  Zisserman]{everingham2010pascal}
+M~Everingham, L~Van~Gool, CKI Williams, J~Winn, and A~Zisserman.
+\newblock The pascal visual object classes (voc) challenge.
+\newblock \emph{International journal of computer vision}, 88\penalty0
+  (2):\penalty0 303--338, 2010.
+
+\end{thebibliography}

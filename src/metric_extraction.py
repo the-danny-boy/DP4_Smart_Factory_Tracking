@@ -16,14 +16,13 @@ from utility_functions import crosshair
 from YOLO_detector_wrapper import setup, detect_wrapper
 from centroid_tracker import Centroid_Tracker
 
-from utility_functions import crosshair, heron, regularity
+from utility_functions import crosshair, heron, regularity, hsv_to_rgb, map_values, clamp
 from itertools import combinations, compress
 
 import scipy.spatial
 
 # Benchmark settings
-early_terminate = 200
-repeat_attempts = 3
+early_terminate = 246 # Which frame to stop at (and save out analysis)
 
 # Environment Support Geometry
 raw_pts = np.asarray([[0,212], [260,487], [404, 486], [400, 327], [410, 328], [959, 147], [959, 538], [0, 537], [0,212]])
@@ -71,6 +70,10 @@ while True:
     if not ret:
         break
 
+    # Create duplicate frames for visualising analysis outputs
+    collision_frame = frame.copy()
+    residence_frame = frame.copy()
+    
     # Detect Objects in Frame
     ret, bboxes, points = detector_func(frame)
 
@@ -83,6 +86,13 @@ while True:
 
         # Iterate through tracked objects and annotate
         for idx, object in zip(trackedObjects.keys(), trackedObjects.values()):
+
+            # Visualise residence time (amount of time in the system) - with continuous colour scale
+            residence_time = object["time"]
+            visualisation_limit = 180
+            hue = 120 - map_values(clamp(residence_time, 0, visualisation_limit), 0, visualisation_limit, 0, 120)
+            color = tuple( map( int,hsv_to_rgb((hue, 255, 255))))
+            crosshair(residence_frame, object["positions"][-1], size = 8, thick = 4, color = color)
 
             # Read position deque for tracked object and calculate framewise differences for velocity
             if len(object["positions"]) > 5:
@@ -111,8 +121,8 @@ while True:
                     damage_speed = k_speed * impact_speed * impact_speed
                     # Note - coefficient should take into account ability to double up application, or only exert once in collision with wall
 
-                    # Visualise instant collisions (yellow)
-                    crosshair(frame, object["positions"][-1], size = 8, color = (0,255,255))
+                    # Visualise instant collisions
+                    crosshair(collision_frame, object["positions"][-1], size = 8, thick = 4, color = (0,0,255)) # red direct / primary
 
                     # Damage sharing
                     # Extract position of this object and all others (separately)
@@ -132,6 +142,9 @@ while True:
                     for collision_key in collision_keys:
                         trackedObjects[collision_key]["damage"] += damage_speed
 
+                        # Visualise other collision targets
+                        crosshair(collision_frame, trackedObjects[collision_key]["positions"][-1], size = 8, thick = 4, color = (0,255,255)) # yellow secondary
+
 
                 # More time in the system increases likeliness of repeated / cumulative loading - incremental
                 k_time = 1
@@ -142,8 +155,8 @@ while True:
                 object["damage"] += damage_delta
 
                 # Visualise damaged candidates (red)
-                if object["damage"] > 10:
-                    crosshair(frame, object["positions"][-1], size = 8, color = (0,0,255))
+                """if object["damage"] > 10:
+                    crosshair(frame, object["positions"][-1], size = 8, color = (0,0,255))"""
 
                 population_metrics["time"].append(object["time"])
                 population_metrics["velocity"].append(mean_speed)
@@ -257,27 +270,40 @@ while True:
             # Combine adjacent regions and count
             good_canvas = cv2.inRange(blank_canvas, (0,10,0), (0,255,0))
             good_canvas = cv2.erode(good_canvas, (5,5))
-            _good_count, _labels = cv2.connectedComponents(good_canvas)
+            _good_count, _labels, good_stats, good_centroids = cv2.connectedComponentsWithStats(good_canvas)
             good_count = _good_count - 1
                 
             crit_canvas = cv2.inRange(blank_canvas, (0,0,10), (0,0,255))
             crit_canvas = cv2.erode(crit_canvas, (5,5))
-            _crit_count, _labels = cv2.connectedComponents(crit_canvas)
+            _crit_count, _labels, crit_stats, crit_centroids  = cv2.connectedComponentsWithStats(crit_canvas)
             crit_count = _crit_count - 1
                 
             warn_canvas = cv2.inRange(blank_canvas, (10,0,0), (255,0,0))
             warn_canvas = cv2.erode(warn_canvas, (5,5))
-            _warn_count, _labels = cv2.connectedComponents(warn_canvas)
+            _warn_count, _labels, warn_stats, warn_centroids = cv2.connectedComponentsWithStats(warn_canvas)
             warn_count = _warn_count - 1
 
             # Visualise this as a 50% opacity overlap
             frame = cv2.addWeighted(frame, 0.5, blank_canvas.astype("uint8"), 0.5, 1)
 
-            """
-            print(f"INFO: There are {good_count} good regions")
-            print(f"INFO: There are {warn_count} warning regions")
-            print(f"INFO: There are {crit_count} critical regions")
-            """
+            print("==========================================================================================================================")
+            print(f"INFO: {good_count} good region{'s' if good_count>0 else ''}")
+            print(f"Location(s): {np.round(good_centroids[1:].astype('int')).tolist()}")
+            print(f"Size(s): {good_stats[1:,cv2.CC_STAT_AREA].tolist()}")
+                   
+            print()
+                        
+            print(f"INFO: {warn_count} warning region{'s' if warn_count>0 else ''}")
+            print(f"Location(s): {np.round(warn_centroids[1:].astype('int')).tolist()}")
+            print(f"Size(s): {warn_stats[1:,cv2.CC_STAT_AREA].tolist()}")
+            
+            print()
+            
+            print(f"INFO: {crit_count} critical region{'s' if crit_count>0 else ''}")
+            print(f"Location(s): {np.round(crit_centroids[1:].astype('int')).tolist()}")
+            print(f"Size(s): {crit_stats[1:,cv2.CC_STAT_AREA].tolist()}")
+            print("==========================================================================================================================")
+            print()
 
 
     #print("Void process time (ms):", void_timed.elapsed)
@@ -290,6 +316,8 @@ while True:
 
     # Show annotated frame
     cv2.imshow("Frame", frame)
+    cv2.imshow("Collision_Frame", collision_frame)
+    cv2.imshow("Residence_Frame", residence_frame)
     
     # Only wait for 1ms to limit the performance overhead
     key = cv2.waitKey(1) & 0xFF
@@ -297,22 +325,20 @@ while True:
     # Escape / close if "q" pressed
     if key == ord("q"):
         break
+
+    # Pause on "p" key
+    if key == ord("p"):
+        cv2.waitKey(0) & 0xFF
+
+    # Early termination and output generation
+    if frame_no == early_terminate:
+        cv2.imwrite("Analysis_Collision.png", collision_frame)
+        cv2.imwrite("Analysis_Cumulative.png", residence_frame)
+        cv2.imwrite("Analysis_Toppling.png", frame)
+        break
     
     frame_no += 1
 
 # Tidy up - close windows and stop video stream object
 cv2.destroyAllWindows()
 vs.stop()
-
-
-"""
-# Can boxplot a range of frames to see distribution in population quantities
-import matplotlib.pyplot as plt
-
-for i in range(60,80):
-    plt.boxplot(np.asarray(times[i]), positions = [i])
-    plt.boxplot(np.asarray(speeds[i]), positions = [i])
-    plt.boxplot(np.asarray(damages[i]), positions = [i])
-
-plt.show()
-"""
